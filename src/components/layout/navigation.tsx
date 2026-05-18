@@ -19,8 +19,7 @@ import { NAV_ITEMS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
 import { useApp } from "@/context/app-context";
-import { Progress } from "@/components/ui/progress";
-import { getRankProgress } from "@/lib/scoring";
+import { useAuth } from "@/context/auth-context";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   "layout-dashboard": LayoutDashboard,
@@ -34,8 +33,8 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 export function Navigation() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { currentUser } = useApp();
-  const progress = getRankProgress(currentUser.points);
+  const { myScore } = useApp();
+  const { email, logout } = useAuth();
 
   const navContent = (
     <>
@@ -78,15 +77,29 @@ export function Navigation() {
       </nav>
 
       <div className="mt-auto rounded-xl border border-white/10 bg-background/50 p-4">
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-xs text-muted">Your rank</span>
-          <span className="text-xs font-semibold text-primary">{currentUser.rank}</span>
-        </div>
-        <p className="mb-2 text-lg font-bold">{currentUser.points} XP</p>
-        <Progress value={progress.percent} className="h-1.5" />
-        <p className="mt-1 text-xs text-muted">
-          {progress.next - currentUser.points} XP to next level
-        </p>
+        <p className="text-xs text-muted">Your score</p>
+        <p className="text-2xl font-bold text-primary">{myScore?.score ?? 0} pts</p>
+        {myScore && (
+          <p className="mt-2 text-xs text-muted leading-relaxed">
+            {myScore.submissions} submitted · {myScore.votesReceived} votes on your ideas ·{" "}
+            {myScore.votesCast} votes cast
+          </p>
+        )}
+        {email && (
+          <p className="mt-3 truncate text-xs text-muted" title={email}>
+            {email}
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            logout();
+            window.location.href = "/login";
+          }}
+          className="mt-2 text-xs text-muted underline-offset-2 hover:text-foreground hover:underline"
+        >
+          Sign out
+        </button>
       </div>
     </>
   );

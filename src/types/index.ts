@@ -40,6 +40,7 @@ export type UseCaseBadge =
 
 export interface User {
   id: string;
+  email?: string;
   name: string;
   department: string;
   avatar: string;
@@ -53,6 +54,7 @@ export interface Comment {
   id: string;
   useCaseId: string;
   userId: string;
+  userEmail?: string;
   userName: string;
   text: string;
   createdAt: string;
@@ -85,9 +87,11 @@ export interface UseCase {
   tags: string[];
   votes: number;
   voterIds: string[];
+  voterEmails: string[];
   comments: Comment[];
   submitter: string;
   submitterId: string;
+  submitterEmail: string;
   createdAt: string;
   innovationScore: number;
   status: UseCaseStatus;

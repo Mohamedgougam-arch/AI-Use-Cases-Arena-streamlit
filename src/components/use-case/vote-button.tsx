@@ -34,8 +34,8 @@ export function VoteButton({ useCaseId, votes, compact }: VoteButtonProps) {
       setAnimating(true);
       setTimeout(() => setAnimating(false), 600);
       toast({
-        title: "+5 XP earned!",
-        description: "Thanks for supporting this idea.",
+        title: "+1 point",
+        description: "Your vote is recorded under your email.",
       });
     }
   };

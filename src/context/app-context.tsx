@@ -10,12 +10,17 @@ import {
   type ReactNode,
 } from "react";
 import { initialUseCases, initialUsers } from "@/data/initial-data";
-import { CURRENT_USER_ID, XP_REWARDS } from "@/lib/constants";
+import { useAuth } from "@/context/auth-context";
+import { getAvatarFromEmail, getDisplayNameFromEmail, normalizeEmail } from "@/lib/auth";
+import {
+  buildParticipantScores,
+  getParticipantScore,
+  type ParticipantScore,
+} from "@/lib/participants";
 import {
   calculateInnovationScore,
   deriveUseCaseBadges,
   getDaysSinceCreated,
-  getRankFromPoints,
 } from "@/lib/scoring";
 import type {
   Comment,
@@ -24,36 +29,48 @@ import type {
   User,
 } from "@/types";
 
-const STORAGE_KEY = "ai-use-cases-arena-state-v3";
+const STORAGE_KEY = "ai-use-cases-arena-state-v4";
 
 interface PersistedState {
   useCases: UseCase[];
-  users: User[];
   votedUseCaseIds: string[];
-  commentCount: number;
-  submittedCount: number;
 }
 
 interface AppContextValue {
   useCases: UseCase[];
-  users: User[];
   currentUser: User;
+  myScore: ParticipantScore | null;
+  participantScores: ParticipantScore[];
   votedUseCaseIds: string[];
   submitUseCase: (input: SubmitUseCaseInput) => UseCase;
   voteOnUseCase: (useCaseId: string) => boolean;
   addComment: (useCaseId: string, text: string) => void;
   hasVoted: (useCaseId: string) => boolean;
-  getUserById: (id: string) => User | undefined;
+  getUseCasesByEmail: (email: string) => UseCase[];
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
+
+function migrateUseCase(uc: UseCase): UseCase {
+  return {
+    ...uc,
+    voterEmails: uc.voterEmails ?? [],
+    submitterEmail:
+      uc.submitterEmail ??
+      (uc.submitterId?.includes("@") ? normalizeEmail(uc.submitterId) : ""),
+  };
+}
 
 function loadState(): PersistedState | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as PersistedState;
+    const parsed = JSON.parse(raw) as PersistedState;
+    return {
+      useCases: (parsed.useCases ?? []).map(migrateUseCase),
+      votedUseCaseIds: parsed.votedUseCaseIds ?? [],
+    };
   } catch {
     return null;
   }
@@ -65,20 +82,17 @@ function saveState(state: PersistedState) {
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [useCases, setUseCases] = useState<UseCase[]>(initialUseCases);
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const { email } = useAuth();
+  const [useCases, setUseCases] = useState<UseCase[]>(
+    initialUseCases.map(migrateUseCase)
+  );
   const [votedUseCaseIds, setVotedUseCaseIds] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("ai-use-cases-arena-state");
-      localStorage.removeItem("ai-use-cases-arena-state-v2");
-    }
     const saved = loadState();
     if (saved) {
       setUseCases(saved.useCases);
-      setUsers(saved.users);
       setVotedUseCaseIds(saved.votedUseCaseIds);
     }
     setHydrated(true);
@@ -86,50 +100,41 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!hydrated) return;
-    saveState({
-      useCases,
-      users,
-      votedUseCaseIds,
-      commentCount: 0,
-      submittedCount: 0,
-    });
-  }, [useCases, users, votedUseCaseIds, hydrated]);
+    saveState({ useCases, votedUseCaseIds });
+  }, [useCases, votedUseCaseIds, hydrated]);
 
-  const currentUser = useMemo(
-    () => users.find((u) => u.id === CURRENT_USER_ID) ?? users[0],
-    [users]
+  const participantScores = useMemo(
+    () => buildParticipantScores(useCases),
+    [useCases]
   );
 
-  const updateCurrentUserPoints = useCallback((delta: number) => {
-    setUsers((prev) =>
-      prev.map((u) => {
-        if (u.id !== CURRENT_USER_ID) return u;
-        const points = u.points + delta;
-        return {
-          ...u,
-          points,
-          rank: getRankFromPoints(points),
-          badges:
-            points >= 200 && !u.badges.includes("innovation-champion")
-              ? [...u.badges, "innovation-champion"]
-              : u.badges,
-        };
-      })
-    );
-  }, []);
+  const myScore = useMemo(
+    () => getParticipantScore(useCases, email),
+    [useCases, email]
+  );
 
-  const awardSubmitterVotePoints = useCallback((submitterId: string) => {
-    setUsers((prev) =>
-      prev.map((u) => {
-        if (u.id !== submitterId) return u;
-        const points = u.points + XP_REWARDS.receiveVote;
-        return { ...u, points, rank: getRankFromPoints(points) };
-      })
-    );
-  }, []);
+  const currentUser = useMemo((): User => {
+    const base = initialUsers[0];
+    if (!email) return base;
+    const normalized = normalizeEmail(email);
+    const stats = myScore;
+    return {
+      ...base,
+      id: normalized,
+      email: normalized,
+      name: stats?.name ?? getDisplayNameFromEmail(normalized),
+      avatar: stats?.avatar ?? getAvatarFromEmail(normalized),
+      points: stats?.score ?? 0,
+      badges: [],
+      rank: "Explorer",
+      votingStreak: 0,
+    };
+  }, [email, myScore]);
 
   const submitUseCase = useCallback(
     (input: SubmitUseCaseInput): UseCase => {
+      if (!email) throw new Error("Must be signed in to submit");
+      const normalized = normalizeEmail(email);
       const id = `uc-${Date.now()}`;
       const createdAt = new Date().toISOString();
       const base: UseCase = {
@@ -145,9 +150,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         tags: input.tags,
         votes: 0,
         voterIds: [],
+        voterEmails: [],
         comments: [],
-        submitter: input.submitterName,
-        submitterId: CURRENT_USER_ID,
+        submitter: getDisplayNameFromEmail(normalized),
+        submitterId: normalized,
+        submitterEmail: normalized,
         createdAt,
         innovationScore: 0,
         status: "Submitted",
@@ -163,38 +170,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
       base.badges = deriveUseCaseBadges(base);
 
       setUseCases((prev) => [base, ...prev]);
-      updateCurrentUserPoints(XP_REWARDS.submitUseCase);
-
-      setUsers((prev) =>
-        prev.map((u) => {
-          if (u.id !== CURRENT_USER_ID) return u;
-          const badges = u.badges.includes("ai-explorer")
-            ? u.badges
-            : [...u.badges, "ai-explorer" as const];
-          return { ...u, badges };
-        })
-      );
-
       return base;
     },
-    [updateCurrentUserPoints]
+    [email]
   );
 
   const voteOnUseCase = useCallback(
     (useCaseId: string): boolean => {
-      if (votedUseCaseIds.includes(useCaseId)) return false;
+      if (!email || votedUseCaseIds.includes(useCaseId)) return false;
+      const normalized = normalizeEmail(email);
 
       setVotedUseCaseIds((prev) => [...prev, useCaseId]);
-      updateCurrentUserPoints(XP_REWARDS.castVote);
 
       setUseCases((prev) =>
         prev.map((uc) => {
           if (uc.id !== useCaseId) return uc;
+          if (uc.voterEmails.includes(normalized)) return uc;
+
           const votes = uc.votes + 1;
-          const voterIds = [...uc.voterIds, CURRENT_USER_ID];
+          const voterEmails = [...uc.voterEmails, normalized];
+          const voterIds = [...uc.voterIds, normalized];
           const updated: UseCase = {
             ...uc,
             votes,
+            voterEmails,
             voterIds,
             innovationScore: calculateInnovationScore(
               votes,
@@ -205,23 +204,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
             ),
           };
           updated.badges = deriveUseCaseBadges(updated);
-          awardSubmitterVotePoints(uc.submitterId);
           return updated;
         })
       );
 
       return true;
     },
-    [votedUseCaseIds, updateCurrentUserPoints, awardSubmitterVotePoints]
+    [email, votedUseCaseIds]
   );
 
   const addComment = useCallback(
     (useCaseId: string, text: string) => {
+      if (!email) return;
+      const normalized = normalizeEmail(email);
       const comment: Comment = {
         id: `comment-${Date.now()}`,
         useCaseId,
-        userId: CURRENT_USER_ID,
-        userName: currentUser.name,
+        userId: normalized,
+        userEmail: normalized,
+        userName: getDisplayNameFromEmail(normalized),
         text,
         createdAt: new Date().toISOString(),
       };
@@ -245,10 +246,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           return updated;
         })
       );
-
-      updateCurrentUserPoints(XP_REWARDS.addComment);
     },
-    [currentUser.name, updateCurrentUserPoints]
+    [email]
   );
 
   const hasVoted = useCallback(
@@ -256,33 +255,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [votedUseCaseIds]
   );
 
-  const getUserById = useCallback(
-    (id: string) => users.find((u) => u.id === id),
-    [users]
+  const getUseCasesByEmail = useCallback(
+    (targetEmail: string) => {
+      const normalized = normalizeEmail(targetEmail);
+      return useCases.filter(
+        (uc) =>
+          uc.submitterEmail === normalized ||
+          normalizeEmail(uc.submitterEmail || "") === normalized
+      );
+    },
+    [useCases]
   );
 
   const value = useMemo(
     () => ({
       useCases,
-      users,
       currentUser,
+      myScore,
+      participantScores,
       votedUseCaseIds,
       submitUseCase,
       voteOnUseCase,
       addComment,
       hasVoted,
-      getUserById,
+      getUseCasesByEmail,
     }),
     [
       useCases,
-      users,
       currentUser,
+      myScore,
+      participantScores,
       votedUseCaseIds,
       submitUseCase,
       voteOnUseCase,
       addComment,
       hasVoted,
-      getUserById,
+      getUseCasesByEmail,
     ]
   );
 

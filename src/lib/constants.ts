@@ -29,11 +29,12 @@ export const CATEGORIES: UseCaseCategory[] = [
 export const IMPACT_LEVELS = ["Low", "Medium", "High"] as const;
 export const EFFORT_LEVELS = ["Low", "Medium", "High"] as const;
 
+/** @deprecated Use SCORE_POINTS from @/lib/participants */
 export const XP_REWARDS = {
-  submitUseCase: 50,
-  receiveVote: 10,
-  castVote: 5,
-  addComment: 5,
+  submitUseCase: 10,
+  receiveVote: 2,
+  castVote: 1,
+  addComment: 1,
 } as const;
 
 export const RANK_THRESHOLDS: { level: RankLevel; minPoints: number }[] = [

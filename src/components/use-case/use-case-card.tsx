@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { MessageSquare, Sparkles } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import type { UseCase } from "@/types";
 import { Badge } from "@/components/ui/badge";
-import { BadgeDisplay } from "@/components/gamification/badge-display";
 import { VoteButton } from "./vote-button";
 import { formatRelativeDate } from "@/lib/utils";
 
@@ -33,7 +32,11 @@ export function UseCaseCard({ useCase, index = 0 }: UseCaseCardProps) {
               <Badge variant="status">{useCase.status}</Badge>
             </div>
             <p className="mb-3 line-clamp-2 text-sm text-muted">{useCase.description}</p>
-            <BadgeDisplay badges={useCase.badges} className="mb-3" />
+            {useCase.votes >= 5 && (
+              <Badge variant="secondary" className="mb-2">
+                Popular · {useCase.votes} votes
+              </Badge>
+            )}
             <div className="flex flex-wrap items-center gap-3 text-xs text-muted">
               <span className="rounded-md bg-secondary/30 px-2 py-0.5">{useCase.department}</span>
               <span>{useCase.category}</span>
@@ -43,14 +46,12 @@ export function UseCaseCard({ useCase, index = 0 }: UseCaseCardProps) {
                 <MessageSquare className="h-3 w-3" />
                 {useCase.comments.length}
               </span>
-              <span className="flex items-center gap-1 text-primary">
-                <Sparkles className="h-3 w-3" />
-                Score {useCase.innovationScore}
-              </span>
+              <span className="font-medium text-primary">{useCase.votes} votes</span>
             </div>
             <div className="mt-3 flex items-center justify-between">
               <span className="text-xs text-muted">
-                by {useCase.submitter} · {formatRelativeDate(useCase.createdAt)}
+                by {useCase.submitterEmail || useCase.submitter} ·{" "}
+                {formatRelativeDate(useCase.createdAt)}
               </span>
               <div className="flex flex-wrap gap-1">
                 {useCase.tags.slice(0, 3).map((tag) => (

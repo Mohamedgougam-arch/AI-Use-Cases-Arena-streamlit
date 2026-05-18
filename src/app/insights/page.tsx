@@ -19,7 +19,6 @@ import {
   getCategoryDistribution,
   getThemeCounts,
   getImpactEffortMatrix,
-  getTopContributors,
   getQuickWins,
   getStrategicBets,
   generateExecutiveSummary,
@@ -27,7 +26,7 @@ import {
 } from "@/lib/analytics";
 
 export default function InsightsPage() {
-  const { useCases, users } = useApp();
+  const { useCases, participantScores } = useApp();
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
 
@@ -36,7 +35,7 @@ export default function InsightsPage() {
   const categoryData = getCategoryDistribution(useCases);
   const themes = getThemeCounts(useCases);
   const matrix = getImpactEffortMatrix(useCases);
-  const contributors = getTopContributors(users).slice(0, 6);
+  const contributors = participantScores.slice(0, 6);
   const quickWins = getQuickWins(useCases);
   const strategicBets = getStrategicBets(useCases);
   const votingTrendData = getVotingTrendData(useCases);
@@ -160,7 +159,7 @@ export default function InsightsPage() {
                 <p className="font-medium">{u.name}</p>
                 <p className="text-xs text-muted">{u.department}</p>
               </div>
-              <span className="ml-auto font-bold text-primary">{u.points} XP</span>
+              <span className="ml-auto font-bold text-primary">{u.score} pts</span>
             </div>
           ))}
         </div>

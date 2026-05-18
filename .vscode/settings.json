@@ -1,0 +1,4 @@
+{
+  "git.editor": "${workspaceFolder}/scripts/git-editor.cmd",
+  "git.useEditorAsCommitInput": true
+}

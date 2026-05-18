@@ -5,22 +5,33 @@ import { usePathname, useRouter } from "next/navigation";
 import { Navigation } from "./navigation";
 import { useAuth } from "@/context/auth-context";
 
+function AuthenticatedShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <main className="lg:pl-64">
+        <div className="min-h-screen px-4 pb-12 pt-20 lg:px-8 lg:pt-8">{children}</div>
+      </main>
+    </div>
+  );
+}
+
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated, isReady } = useAuth();
-  const isLoginPage = pathname === "/login";
+  const isHome = pathname === "/";
 
   useEffect(() => {
     if (!isReady) return;
-    if (isLoginPage && isAuthenticated) {
+    if (pathname === "/login") {
       router.replace("/");
       return;
     }
-    if (!isLoginPage && !isAuthenticated) {
-      router.replace("/login");
+    if (!isAuthenticated && !isHome) {
+      router.replace("/");
     }
-  }, [isReady, isAuthenticated, isLoginPage, router]);
+  }, [isReady, isAuthenticated, isHome, pathname, router]);
 
   if (!isReady) {
     return (
@@ -30,22 +41,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (isLoginPage) {
+  if (!isAuthenticated) {
     return <>{children}</>;
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      <main className="lg:pl-64">
-        <div className="min-h-screen px-4 pb-12 pt-20 lg:px-8 lg:pt-8">
-          {children}
-        </div>
-      </main>
-    </div>
-  );
+  return <AuthenticatedShell>{children}</AuthenticatedShell>;
 }

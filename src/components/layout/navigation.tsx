@@ -94,7 +94,7 @@ export function Navigation() {
           type="button"
           onClick={() => {
             logout();
-            window.location.href = "/login";
+            window.location.href = "/";
           }}
           className="mt-2 text-xs text-muted underline-offset-2 hover:text-foreground hover:underline"
         >

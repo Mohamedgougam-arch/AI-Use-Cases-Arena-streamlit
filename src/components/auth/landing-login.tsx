@@ -44,9 +44,8 @@ export function LandingLogin() {
         description: "Please enter a valid work email address.",
         variant: "destructive",
       });
-      setLoading(false);
-      return;
     }
+    setLoading(false);
   };
 
   return (

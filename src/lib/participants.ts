@@ -116,3 +116,16 @@ export function getParticipantScore(
 export function formatEmailTag(email: string): string {
   return normalizeEmail(email);
 }
+
+/** True when the signed-in user ties or holds the highest participant score. */
+export function isParticipantScoreLeader(
+  email: string | null | undefined,
+  scores: ParticipantScore[]
+): boolean {
+  if (!email || scores.length === 0) return false;
+  const topScore = scores[0].score;
+  if (topScore <= 0) return false;
+  const normalized = normalizeEmail(email);
+  const entry = scores.find((p) => p.email === normalized);
+  return entry !== undefined && entry.score === topScore;
+}

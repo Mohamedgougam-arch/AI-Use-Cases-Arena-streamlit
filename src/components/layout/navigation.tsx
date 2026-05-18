@@ -20,6 +20,9 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
 import { useApp } from "@/context/app-context";
 import { useAuth } from "@/context/auth-context";
+import { LeaderScoreLabel } from "@/components/gamification/leader-score-label";
+import { AboutThisTool } from "@/components/shared/about-this-tool";
+import { isParticipantScoreLeader } from "@/lib/participants";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   "layout-dashboard": LayoutDashboard,
@@ -33,8 +36,9 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 export function Navigation() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { myScore } = useApp();
+  const { myScore, participantScores } = useApp();
   const { email, isAdmin, logout } = useAuth();
+  const isLeader = isParticipantScoreLeader(email, participantScores);
 
   const navContent = (
     <>
@@ -78,6 +82,7 @@ export function Navigation() {
 
       <div className="mt-auto rounded-xl border border-white/10 bg-background/50 p-4">
         <p className="text-xs text-muted">Your score</p>
+        {isLeader && <LeaderScoreLabel />}
         <p className="text-2xl font-bold text-primary">{myScore?.score ?? 0} pts</p>
         {myScore && (
           <p className="mt-2 text-xs text-muted leading-relaxed">
@@ -108,6 +113,8 @@ export function Navigation() {
           Sign out
         </button>
       </div>
+
+      <AboutThisTool compact className="mt-4" />
     </>
   );
 

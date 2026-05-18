@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ParticlesBackground } from "@/components/shared/particles-background";
+import { AboutThisTool } from "@/components/shared/about-this-tool";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "@/hooks/use-toast";
 
@@ -163,6 +164,8 @@ export function LandingLogin() {
           </div>
         </motion.div>
       </motion.div>
+
+      <AboutThisTool className="relative z-10 mx-auto mt-10 w-full max-w-3xl" />
     </div>
   );
 }

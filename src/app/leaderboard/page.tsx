@@ -4,12 +4,16 @@ import { Trophy } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { LeaderboardCard } from "@/components/gamification/leaderboard-card";
 import { ScoreGuide } from "@/components/gamification/score-guide";
+import { LeaderScoreLabel } from "@/components/gamification/leader-score-label";
+import { AboutThisTool } from "@/components/shared/about-this-tool";
 import { useApp } from "@/context/app-context";
 import { useAuth } from "@/context/auth-context";
+import { isParticipantScoreLeader } from "@/lib/participants";
 
 export default function LeaderboardPage() {
   const { participantScores, myScore, useCases } = useApp();
   const { email } = useAuth();
+  const isLeader = isParticipantScoreLeader(email, participantScores);
 
   const topPeople = participantScores.slice(0, 10).map((p, i) => ({
     rank: i + 1,
@@ -47,6 +51,7 @@ export default function LeaderboardPage() {
             <div className="mt-6 space-y-3 border-t border-white/10 pt-6">
               <div>
                 <p className="text-sm text-muted">Your total score</p>
+                {isLeader && <LeaderScoreLabel className="mt-2" />}
                 <p className="text-4xl font-bold text-primary">{myScore.score}</p>
               </div>
               <dl className="grid grid-cols-2 gap-3 text-sm">
@@ -86,6 +91,8 @@ export default function LeaderboardPage() {
         entries={topIdeas}
         valueLabel="votes"
       />
+
+      <AboutThisTool />
     </div>
   );
 }

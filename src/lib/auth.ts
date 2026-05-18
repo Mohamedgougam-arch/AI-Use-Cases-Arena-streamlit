@@ -1,9 +1,21 @@
 export const AUTH_STORAGE_KEY = "ai-use-cases-arena-auth";
 
+/** Internal email used for admin sessions (type Admin on the login screen). */
+export const ADMIN_EMAIL = "arena-admin@invest-nl.nl";
+export const ADMIN_DISPLAY_NAME = "Arena Admin";
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export function isAdminLogin(input: string): boolean {
+  return input.trim().toLowerCase() === "admin";
+}
 
 export function isValidEmail(email: string): boolean {
   return EMAIL_PATTERN.test(email.trim().toLowerCase());
+}
+
+export function isAdminEmail(email: string): boolean {
+  return normalizeEmail(email) === ADMIN_EMAIL;
 }
 
 export function normalizeEmail(email: string): string {

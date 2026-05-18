@@ -10,29 +10,41 @@ import {
   type ReactNode,
 } from "react";
 import {
+  ADMIN_EMAIL,
   AUTH_STORAGE_KEY,
+  isAdminLogin,
   isValidEmail,
   normalizeEmail,
 } from "@/lib/auth";
 
+interface AuthSession {
+  email: string;
+  isAdmin: boolean;
+}
+
 interface AuthContextValue {
   email: string | null;
+  isAdmin: boolean;
   isAuthenticated: boolean;
   isReady: boolean;
-  login: (email: string) => boolean;
+  login: (input: string) => boolean;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function loadSession(): string | null {
+function loadSession(): AuthSession | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(AUTH_STORAGE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as { email?: string };
-    if (parsed.email && isValidEmail(parsed.email)) {
-      return normalizeEmail(parsed.email);
+    const parsed = JSON.parse(raw) as { email?: string; isAdmin?: boolean };
+    if (!parsed.email) return null;
+    if (parsed.isAdmin && parsed.email === ADMIN_EMAIL) {
+      return { email: ADMIN_EMAIL, isAdmin: true };
+    }
+    if (isValidEmail(parsed.email)) {
+      return { email: normalizeEmail(parsed.email), isAdmin: false };
     }
     return null;
   } catch {
@@ -40,46 +52,65 @@ function loadSession(): string | null {
   }
 }
 
-function saveSession(email: string | null) {
+function saveSession(session: AuthSession | null) {
   if (typeof window === "undefined") return;
-  if (!email) {
+  if (!session) {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     return;
   }
-  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ email }));
+  localStorage.setItem(
+    AUTH_STORAGE_KEY,
+    JSON.stringify({ email: session.email, isAdmin: session.isAdmin })
+  );
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [email, setEmail] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    setEmail(loadSession());
+    const session = loadSession();
+    if (session) {
+      setEmail(session.email);
+      setIsAdmin(session.isAdmin);
+    }
     setIsReady(true);
   }, []);
 
-  const login = useCallback((rawEmail: string) => {
-    const normalized = normalizeEmail(rawEmail);
+  const login = useCallback((rawInput: string) => {
+    const trimmed = rawInput.trim();
+    if (isAdminLogin(trimmed)) {
+      setEmail(ADMIN_EMAIL);
+      setIsAdmin(true);
+      saveSession({ email: ADMIN_EMAIL, isAdmin: true });
+      return true;
+    }
+
+    const normalized = normalizeEmail(trimmed);
     if (!isValidEmail(normalized)) return false;
     setEmail(normalized);
-    saveSession(normalized);
+    setIsAdmin(false);
+    saveSession({ email: normalized, isAdmin: false });
     return true;
   }, []);
 
   const logout = useCallback(() => {
     setEmail(null);
+    setIsAdmin(false);
     saveSession(null);
   }, []);
 
   const value = useMemo(
     () => ({
       email,
+      isAdmin,
       isAuthenticated: Boolean(email),
       isReady,
       login,
       logout,
     }),
-    [email, isReady, login, logout]
+    [email, isAdmin, isReady, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

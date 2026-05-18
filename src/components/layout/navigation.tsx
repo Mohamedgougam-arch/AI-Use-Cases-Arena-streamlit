@@ -34,7 +34,7 @@ export function Navigation() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { myScore } = useApp();
-  const { email, logout } = useAuth();
+  const { email, isAdmin, logout } = useAuth();
 
   const navContent = (
     <>
@@ -86,9 +86,16 @@ export function Navigation() {
           </p>
         )}
         {email && (
-          <p className="mt-3 truncate text-xs text-muted" title={email}>
-            {email}
-          </p>
+          <div className="mt-3 space-y-1">
+            {isAdmin && (
+              <span className="inline-block rounded-md bg-primary/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                Admin
+              </span>
+            )}
+            <p className="truncate text-xs text-muted" title={email}>
+              {isAdmin ? "Administrator" : email}
+            </p>
+          </div>
         )}
         <button
           type="button"

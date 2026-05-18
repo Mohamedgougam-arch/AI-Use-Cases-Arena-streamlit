@@ -11,7 +11,13 @@ import {
 } from "react";
 import { initialUseCases, initialUsers } from "@/data/initial-data";
 import { useAuth } from "@/context/auth-context";
-import { getAvatarFromEmail, getDisplayNameFromEmail, normalizeEmail } from "@/lib/auth";
+import {
+  ADMIN_DISPLAY_NAME,
+  getAvatarFromEmail,
+  getDisplayNameFromEmail,
+  isAdminEmail,
+  normalizeEmail,
+} from "@/lib/auth";
 import {
   buildParticipantScores,
   getParticipantScore,
@@ -44,6 +50,7 @@ interface AppContextValue {
   votedUseCaseIds: string[];
   submitUseCase: (input: SubmitUseCaseInput) => UseCase;
   voteOnUseCase: (useCaseId: string) => boolean;
+  unvoteOnUseCase: (useCaseId: string) => boolean;
   addComment: (useCaseId: string, text: string) => void;
   hasVoted: (useCaseId: string) => boolean;
   getUseCasesByEmail: (email: string) => UseCase[];
@@ -118,12 +125,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!email) return base;
     const normalized = normalizeEmail(email);
     const stats = myScore;
+    const admin = isAdminEmail(normalized);
     return {
       ...base,
       id: normalized,
       email: normalized,
-      name: stats?.name ?? getDisplayNameFromEmail(normalized),
-      avatar: stats?.avatar ?? getAvatarFromEmail(normalized),
+      name: admin ? ADMIN_DISPLAY_NAME : (stats?.name ?? getDisplayNameFromEmail(normalized)),
+      avatar: admin ? "AD" : (stats?.avatar ?? getAvatarFromEmail(normalized)),
       points: stats?.score ?? 0,
       badges: [],
       rank: "Explorer",
@@ -213,6 +221,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [email, votedUseCaseIds]
   );
 
+  const unvoteOnUseCase = useCallback(
+    (useCaseId: string): boolean => {
+      if (!email || !votedUseCaseIds.includes(useCaseId)) return false;
+      const normalized = normalizeEmail(email);
+
+      setVotedUseCaseIds((prev) => prev.filter((id) => id !== useCaseId));
+
+      setUseCases((prev) =>
+        prev.map((uc) => {
+          if (uc.id !== useCaseId) return uc;
+          if (!uc.voterEmails.includes(normalized)) return uc;
+
+          const votes = Math.max(0, uc.votes - 1);
+          const voterEmails = uc.voterEmails.filter((e) => e !== normalized);
+          const voterIds = uc.voterIds.filter((id) => id !== normalized);
+          const updated: UseCase = {
+            ...uc,
+            votes,
+            voterEmails,
+            voterIds,
+            innovationScore: calculateInnovationScore(
+              votes,
+              uc.impact,
+              uc.effort,
+              uc.comments.length,
+              getDaysSinceCreated(uc.createdAt)
+            ),
+          };
+          updated.badges = deriveUseCaseBadges(updated);
+          return updated;
+        })
+      );
+
+      return true;
+    },
+    [email, votedUseCaseIds]
+  );
+
   const addComment = useCallback(
     (useCaseId: string, text: string) => {
       if (!email) return;
@@ -276,6 +322,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       votedUseCaseIds,
       submitUseCase,
       voteOnUseCase,
+      unvoteOnUseCase,
       addComment,
       hasVoted,
       getUseCasesByEmail,
@@ -288,6 +335,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       votedUseCaseIds,
       submitUseCase,
       voteOnUseCase,
+      unvoteOnUseCase,
       addComment,
       hasVoted,
       getUseCasesByEmail,

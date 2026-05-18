@@ -19,7 +19,7 @@ const highlights = [
   {
     icon: ThumbsUp,
     title: "Vote and prioritize",
-    description: "Help decide which opportunities move forward.",
+    description: "Vote or change your mind — click again to remove a vote.",
   },
   {
     icon: Trophy,
@@ -40,8 +40,8 @@ export function LandingLogin() {
     const ok = login(email);
     if (!ok) {
       toast({
-        title: "Invalid email",
-        description: "Please enter a valid work email address.",
+        title: "Sign in failed",
+        description: "Enter a valid work email or Admin for administrator access.",
         variant: "destructive",
       });
     }
@@ -123,20 +123,21 @@ export function LandingLogin() {
             <div className="relative z-10">
               <h2 className="text-xl font-bold tracking-tight">Sign in to continue</h2>
               <p className="mt-2 text-sm text-muted">
-                Use your work email to access the arena.
+                Use your work email, or type <span className="font-medium text-foreground">Admin</span> for
+                administrator access.
               </p>
 
               <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Work email address</Label>
+                  <Label htmlFor="email">Work email or Admin</Label>
                   <motion.div className="relative">
                     <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
                     <Input
                       id="email"
-                      type="email"
+                      type="text"
                       inputMode="email"
-                      autoComplete="email"
-                      placeholder="you@invest-nl.nl"
+                      autoComplete="username"
+                      placeholder="you@invest-nl.nl or Admin"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="pl-10"

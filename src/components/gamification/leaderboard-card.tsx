@@ -29,6 +29,9 @@ export function LeaderboardCard({
     <div className="glass-card p-6">
       <h3 className="mb-4 text-lg font-bold">{title}</h3>
       <div className="space-y-3">
+        {entries.length === 0 && (
+          <p className="text-sm text-muted py-2">No entries yet.</p>
+        )}
         {entries.map((entry, i) => {
           const RankIcon = rankIcons[i] ?? Award;
           return (

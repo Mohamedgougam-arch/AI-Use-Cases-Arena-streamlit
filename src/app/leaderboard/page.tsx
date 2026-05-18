@@ -72,10 +72,12 @@ export default function LeaderboardPage() {
             {progress.next - currentUser.points} XP to next rank
           </p>
         </div>
-        <div className="mt-4 flex items-center justify-center gap-2 text-sm text-orange-400">
-          <Flame className="h-4 w-4" />
-          {currentUser.votingStreak} day voting streak
-        </div>
+        {currentUser.votingStreak > 0 && (
+          <div className="mt-4 flex items-center justify-center gap-2 text-sm text-orange-400">
+            <Flame className="h-4 w-4" />
+            {currentUser.votingStreak} day voting streak
+          </div>
+        )}
       </motion.div>
 
       <div className="grid gap-6 lg:grid-cols-3">

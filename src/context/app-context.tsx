@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { initialUseCases, initialUsers } from "@/data/mock-data";
+import { initialUseCases, initialUsers } from "@/data/initial-data";
 import { CURRENT_USER_ID, XP_REWARDS } from "@/lib/constants";
 import {
   calculateInnovationScore,
@@ -24,7 +24,7 @@ import type {
   User,
 } from "@/types";
 
-const STORAGE_KEY = "ai-use-cases-arena-state";
+const STORAGE_KEY = "ai-use-cases-arena-state-v3";
 
 interface PersistedState {
   useCases: UseCase[];
@@ -71,6 +71,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("ai-use-cases-arena-state");
+      localStorage.removeItem("ai-use-cases-arena-state-v2");
+    }
     const saved = loadState();
     if (saved) {
       setUseCases(saved.useCases);

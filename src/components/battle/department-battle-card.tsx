@@ -11,6 +11,14 @@ interface DepartmentBattleCardProps {
 }
 
 export function DepartmentBattleCard({ stats, maxScore }: DepartmentBattleCardProps) {
+  if (!stats.length) {
+    return (
+      <p className="text-sm text-muted py-4 text-center">
+        Department rankings will appear once teams start submitting use cases.
+      </p>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {stats.map((dept, i) => {

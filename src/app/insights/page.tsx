@@ -23,8 +23,8 @@ import {
   getQuickWins,
   getStrategicBets,
   generateExecutiveSummary,
+  getVotingTrendData,
 } from "@/lib/analytics";
-import { votingTrendData } from "@/data/mock-data";
 
 export default function InsightsPage() {
   const { useCases, users } = useApp();
@@ -39,6 +39,7 @@ export default function InsightsPage() {
   const contributors = getTopContributors(users).slice(0, 6);
   const quickWins = getQuickWins(useCases);
   const strategicBets = getStrategicBets(useCases);
+  const votingTrendData = getVotingTrendData(useCases);
 
   const handleGenerateSummary = () => {
     setGenerating(true);
@@ -117,6 +118,9 @@ export default function InsightsPage() {
         <div className="glass-card p-6">
           <h3 className="font-bold mb-4">Quick Wins Quadrant</h3>
           <ul className="space-y-2">
+            {quickWins.length === 0 && (
+              <li className="text-sm text-muted">No quick wins yet.</li>
+            )}
             {quickWins.map((uc) => (
               <li key={uc.id} className="flex justify-between text-sm rounded-lg bg-primary/5 p-3">
                 <span>{uc.title}</span>
@@ -128,6 +132,9 @@ export default function InsightsPage() {
         <div className="glass-card p-6">
           <h3 className="font-bold mb-4">Strategic Bets Quadrant</h3>
           <ul className="space-y-2">
+            {strategicBets.length === 0 && (
+              <li className="text-sm text-muted">No strategic bets yet.</li>
+            )}
             {strategicBets.map((uc) => (
               <li key={uc.id} className="flex justify-between text-sm rounded-lg bg-secondary/20 p-3">
                 <span>{uc.title}</span>
@@ -141,6 +148,9 @@ export default function InsightsPage() {
       <div className="glass-card p-6">
         <h3 className="font-bold mb-4">Most Active Contributors</h3>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {contributors.length === 0 && (
+            <p className="text-sm text-muted col-span-full">No contributors yet.</p>
+          )}
           {contributors.map((u) => (
             <div key={u.id} className="flex items-center gap-3 rounded-lg bg-white/5 p-3">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-xs font-bold">

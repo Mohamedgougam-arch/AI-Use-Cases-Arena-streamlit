@@ -11,6 +11,7 @@ import {
   Zap,
   Flame,
   ArrowRight,
+  Inbox,
 } from "lucide-react";
 import { useApp } from "@/context/app-context";
 import { StatCard } from "@/components/shared/stat-card";
@@ -21,10 +22,10 @@ import {
   getTotalVotes,
   getTopUseCase,
   getDepartmentStats,
-  getMostActiveDepartment,
   getTrendingUseCases,
   getQuickWins,
 } from "@/lib/analytics";
+import { EmptyState } from "@/components/shared/empty-state";
 
 export default function DashboardPage() {
   const { useCases } = useApp();
@@ -86,21 +87,21 @@ export default function DashboardPage() {
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total Use Cases" value={useCases.length} icon={FileText} trend="+12% this month" />
-        <StatCard label="Total Votes" value={totalVotes} icon={ThumbsUp} trend="Growing engagement" />
+        <StatCard label="Total Use Cases" value={useCases.length} icon={FileText} />
+        <StatCard label="Total Votes" value={totalVotes} icon={ThumbsUp} />
         <StatCard
           label="Top-Ranked Use Case"
           value={topCase?.votes ?? 0}
           icon={Trophy}
           animate={false}
-          trend={topCase?.title?.slice(0, 30) + "..."}
+          trend={topCase ? `${topCase.title.slice(0, 30)}...` : undefined}
         />
         <StatCard
           label="Most Active Department"
           value={deptStats[0]?.useCaseCount ?? 0}
           icon={Building2}
           animate={false}
-          trend={getMostActiveDepartment(deptStats)}
+          trend={deptStats[0]?.department}
         />
       </section>
 
@@ -116,9 +117,22 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="space-y-4">
-            {trending.map((uc, i) => (
-              <UseCaseCard key={uc.id} useCase={uc} index={i} />
-            ))}
+            {trending.length === 0 ? (
+              <EmptyState
+                icon={Inbox}
+                title="No use cases yet"
+                description="Be the first to submit an AI use case for your team."
+                action={
+                  <Button asChild>
+                    <Link href="/submit">Submit Use Case</Link>
+                  </Button>
+                }
+              />
+            ) : (
+              trending.map((uc, i) => (
+                <UseCaseCard key={uc.id} useCase={uc} index={i} />
+              ))
+            )}
           </div>
         </div>
 
@@ -131,21 +145,25 @@ export default function DashboardPage() {
             <p className="mb-4 text-sm text-muted">
               High impact, low effort opportunities
             </p>
-            <ul className="space-y-3">
-              {quickWins.slice(0, 4).map((uc) => (
-                <li key={uc.id}>
-                  <Link
-                    href={`/use-cases/${uc.id}`}
-                    className="block rounded-lg p-3 hover:bg-white/5 transition-colors"
-                  >
-                    <p className="font-medium text-sm">{uc.title}</p>
-                    <p className="text-xs text-primary mt-1">
-                      Score {uc.innovationScore}
-                    </p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {quickWins.length === 0 ? (
+              <p className="text-sm text-muted">No quick wins identified yet.</p>
+            ) : (
+              <ul className="space-y-3">
+                {quickWins.slice(0, 4).map((uc) => (
+                  <li key={uc.id}>
+                    <Link
+                      href={`/use-cases/${uc.id}`}
+                      className="block rounded-lg p-3 hover:bg-white/5 transition-colors"
+                    >
+                      <p className="font-medium text-sm">{uc.title}</p>
+                      <p className="text-xs text-primary mt-1">
+                        Score {uc.innovationScore}
+                      </p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className="glass-card p-6">
@@ -154,27 +172,38 @@ export default function DashboardPage() {
               Hottest Departments
             </h2>
             <div className="space-y-3">
-              {deptStats.slice(0, 5).map((d, i) => (
-                <div key={d.department} className="flex items-center justify-between">
-                  <span className="text-sm">
-                    {i + 1}. {d.department}
-                  </span>
-                  <span className="text-sm font-bold text-primary">{d.innovationScore}</span>
-                </div>
-              ))}
+              {deptStats.length === 0 ? (
+                <p className="text-sm text-muted">No department activity yet.</p>
+              ) : (
+                deptStats.slice(0, 5).map((d, i) => (
+                  <div key={d.department} className="flex items-center justify-between">
+                    <span className="text-sm">
+                      {i + 1}. {d.department}
+                    </span>
+                    <span className="text-sm font-bold text-primary">{d.innovationScore}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
           <div className="glass-card p-6">
             <h2 className="mb-2 text-lg font-bold">Innovation Momentum</h2>
-            <p className="text-3xl font-bold text-gradient">+24%</p>
-            <p className="text-sm text-muted mt-1">vs last month</p>
+            <p className="text-3xl font-bold text-gradient">
+              {useCases.length > 0 ? totalVotes : "—"}
+            </p>
+            <p className="text-sm text-muted mt-1">total votes cast</p>
           </div>
         </div>
       </section>
 
       <section className="glass-card p-6">
         <h2 className="mb-4 text-xl font-bold">AI Opportunity Heatmap</h2>
+        {deptStats.length === 0 ? (
+          <p className="text-sm text-muted">
+            Department activity will appear here once use cases are submitted.
+          </p>
+        ) : (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 md:grid-cols-5">
           {deptStats.map((d) => (
             <div
@@ -190,6 +219,7 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
+        )}
       </section>
     </div>
   );

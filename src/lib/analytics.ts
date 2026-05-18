@@ -36,10 +36,32 @@ export function getMostActiveDepartment(stats: DepartmentStats[]): string {
 }
 
 export function getTrendingUseCases(useCases: UseCase[], limit = 5): UseCase[] {
+  if (!useCases.length) return [];
+  const hot = [...useCases]
+    .filter((uc) => uc.badges.includes("Trending") || uc.votes >= 5)
+    .sort((a, b) => b.innovationScore - a.innovationScore);
+  if (hot.length) return hot.slice(0, limit);
   return [...useCases]
-    .filter((uc) => uc.badges.includes("Trending") || uc.votes >= 20)
-    .sort((a, b) => b.innovationScore - a.innovationScore)
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
     .slice(0, limit);
+}
+
+export function getVotingTrendData(useCases: UseCase[]) {
+  if (!useCases.length) return [];
+  const monthMap = new Map<string, number>();
+  useCases.forEach((uc) => {
+    const month = new Date(uc.createdAt).toLocaleString("en-US", {
+      month: "short",
+    });
+    monthMap.set(month, (monthMap.get(month) ?? 0) + uc.votes);
+  });
+  return Array.from(monthMap.entries()).map(([month, votes]) => ({
+    month,
+    votes,
+  }));
 }
 
 export function getQuickWins(useCases: UseCase[]): UseCase[] {
@@ -85,6 +107,12 @@ export function getTopContributors(users: User[]) {
 }
 
 export function generateExecutiveSummary(useCases: UseCase[]): string {
+  if (!useCases.length) {
+    return `Executive Summary — AI Use Cases Arena
+
+No use cases have been submitted yet. Encourage teams across Invest-NL to share their AI ideas in the arena. Once submissions and votes begin, this summary will highlight portfolio trends, quick wins, and department momentum.`;
+  }
+
   const total = useCases.length;
   const votes = getTotalVotes(useCases);
   const top = getTopUseCase(useCases);

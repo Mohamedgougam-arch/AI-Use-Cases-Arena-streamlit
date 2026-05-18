@@ -131,7 +131,15 @@ export default function GalleryPage() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {useCases.length === 0 ? (
+        <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
+          <Grid3X3 className="mb-4 h-12 w-12 text-muted" />
+          <p className="text-lg font-medium">No use cases yet</p>
+          <p className="text-sm text-muted">
+            Be the first to submit an AI use case for your team.
+          </p>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="glass-card flex flex-col items-center justify-center py-16 text-center">
           <Grid3X3 className="mb-4 h-12 w-12 text-muted" />
           <p className="text-lg font-medium">No use cases found</p>

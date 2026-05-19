@@ -1,4 +1,5 @@
 import type { DepartmentStats, UseCase, User } from "@/types";
+import { isKnownDepartment, normalizeDepartment } from "@/lib/constants";
 import { getImpactScore, getEffortScore, isQuickWin, isStrategicBet } from "@/lib/scoring";
 
 export function getTotalVotes(useCases: UseCase[]): number {
@@ -14,8 +15,10 @@ export function getDepartmentStats(useCases: UseCase[]): DepartmentStats[] {
   const map = new Map<string, DepartmentStats>();
 
   useCases.forEach((uc) => {
-    const existing = map.get(uc.department) ?? {
-      department: uc.department,
+    const department = normalizeDepartment(uc.department);
+    if (!isKnownDepartment(department)) return;
+    const existing = map.get(department) ?? {
+      department,
       useCaseCount: 0,
       totalVotes: 0,
       innovationScore: 0,
@@ -25,7 +28,7 @@ export function getDepartmentStats(useCases: UseCase[]): DepartmentStats[] {
     existing.totalVotes += uc.votes;
     existing.innovationScore += uc.innovationScore;
     existing.engagement += uc.comments.length + uc.votes;
-    map.set(uc.department, existing);
+    map.set(department, existing);
   });
 
   return Array.from(map.values()).sort((a, b) => b.innovationScore - a.innovationScore);

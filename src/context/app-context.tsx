@@ -23,6 +23,7 @@ import {
   getParticipantScore,
   type ParticipantScore,
 } from "@/lib/participants";
+import { normalizeDepartment } from "@/lib/constants";
 import {
   calculateInnovationScore,
   deriveUseCaseBadges,
@@ -63,6 +64,7 @@ const AppContext = createContext<AppContextValue | null>(null);
 function migrateUseCase(uc: UseCase): UseCase {
   return {
     ...uc,
+    department: normalizeDepartment(uc.department),
     voterEmails: uc.voterEmails ?? [],
     creatorMessages: uc.creatorMessages ?? [],
     submitterEmail:
@@ -154,7 +156,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         description: input.description,
         businessProblem: input.businessProblem,
         proposedSolution: input.proposedSolution,
-        department: input.department,
+        department: normalizeDepartment(input.department),
         category: input.category,
         impact: input.impact,
         effort: input.effort,

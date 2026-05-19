@@ -12,6 +12,25 @@ export const DEPARTMENTS = [
   "Cyber Security",
 ] as const;
 
+export type Department = (typeof DEPARTMENTS)[number];
+
+/** Legacy labels from earlier builds; mapped to current dropdown values. */
+const DEPARTMENT_LEGACY_ALIASES: Record<string, Department> = {
+  Investment: "Capital",
+};
+
+export function normalizeDepartment(value: string): string {
+  const trimmed = value.trim();
+  if ((DEPARTMENTS as readonly string[]).includes(trimmed)) {
+    return trimmed;
+  }
+  return DEPARTMENT_LEGACY_ALIASES[trimmed] ?? trimmed;
+}
+
+export function isKnownDepartment(value: string): value is Department {
+  return (DEPARTMENTS as readonly string[]).includes(value.trim());
+}
+
 export const CATEGORIES: UseCaseCategory[] = [
   "Productivity",
   "Risk",

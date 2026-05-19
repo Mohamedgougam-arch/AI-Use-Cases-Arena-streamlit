@@ -196,7 +196,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setUseCases((prev) => [base, ...prev]);
       return base;
     },
-    [email, isAdmin]
+    [email]
   );
 
   const voteOnUseCase = useCallback(

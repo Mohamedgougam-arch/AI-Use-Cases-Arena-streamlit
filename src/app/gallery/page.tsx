@@ -13,7 +13,13 @@ import {
 } from "@/components/ui/select";
 import { useApp } from "@/context/app-context";
 import { useFilteredUseCases } from "@/hooks/use-filtered-use-cases";
-import { DEPARTMENTS, CATEGORIES, IMPACT_LEVELS, EFFORT_LEVELS } from "@/lib/constants";
+import {
+  DEPARTMENTS,
+  CATEGORIES,
+  IMPACT_LEVELS,
+  EFFORT_LEVELS,
+  type Department,
+} from "@/lib/constants";
 import type { SortOption } from "@/types";
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
@@ -51,7 +57,9 @@ export default function GalleryPage() {
         <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:flex sm:flex-wrap">
           <Select
             value={filters.department ?? "all"}
-            onValueChange={(v) => setFilters({ ...filters, department: v === "all" ? undefined : v })}
+            onValueChange={(v) =>
+              setFilters({ ...filters, department: v === "all" ? undefined : (v as Department) })
+            }
           >
             <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Department" /></SelectTrigger>
             <SelectContent>

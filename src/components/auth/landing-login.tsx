@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Sparkles, FileText, ThumbsUp, Trophy } from "lucide-react";
+import Image from "next/image";
+import { Mail, FileText, ThumbsUp, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -65,9 +66,16 @@ export function LandingLogin() {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/20 shadow-glow-sm"
+            className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-2.5 shadow-glow-sm dark:bg-white"
           >
-            <Sparkles className="h-7 w-7 text-primary" />
+            <Image
+              src="/invest-nl-logo.png"
+              alt="Invest-NL"
+              width={48}
+              height={48}
+              className="h-full w-full object-contain"
+              priority
+            />
           </motion.div>
           <motion.p
             initial={{ opacity: 0 }}

@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   title: "AI Use Cases Arena | Invest-NL",
   description:
     "Submit, explore, vote, and prioritize AI use cases that transform Invest-NL.",
+  icons: {
+    icon: "/invest-nl-logo.png",
+    apple: "/invest-nl-logo.png",
+  },
 };
 
 export default function RootLayout({

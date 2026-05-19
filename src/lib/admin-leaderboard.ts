@@ -35,7 +35,7 @@ export function buildAdminContributorRows(
 
   const lastSeen = new Map(knownUsers.map((u) => [u.email, u.lastSeenAt]));
 
-  const rows: AdminContributorRow[] = [...emails].map((email) => {
+  const rows = [...emails].map((email) => {
     const stats = byEmail.get(email);
     return {
       email,

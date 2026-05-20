@@ -1,101 +1,72 @@
-# AI Use Cases Arena
+# AI Use Cases Arena (Streamlit)
 
-A gamified collaborative platform for Invest-NL business users to submit, browse, vote on, and prioritize AI use cases.
+A gamified collaborative platform for Invest-NL business users to submit, browse, vote on, and prioritize AI use cases. Rebuilt in **Python** with **Streamlit** for easy internal hosting.
 
 ## Tech Stack
 
-- **Next.js 15** (App Router)
-- **TypeScript**
-- **Tailwind CSS**
-- **shadcn/ui** (Radix primitives)
-- **Framer Motion**
-- **Lucide Icons**
-- **Recharts**
-- **Supabase-ready** architecture (mock data by default)
+- **Python 3.10+**
+- **Streamlit**
+- **Pandas** and **Plotly** for insights charts
+- JSON file persistence (`data/arena_state.json`) — shared across users on the same server instance
+
+The original Next.js app remains in `src/` for reference; the active app is the Streamlit entry point.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18.18 or later
-- npm, yarn, or pnpm
+- Python 3.10 or later
 
 ### Install dependencies
 
 ```bash
-cd "C:\AI Use Cases Arena"
-npm install
+cd "C:\AI Use Cases Arena - In Python"
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
-### Run the development server
+On macOS/Linux, use `source .venv/bin/activate`.
+
+### Run locally
 
 ```bash
-npm run dev
+streamlit run app.py
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open the URL shown in the terminal (typically http://localhost:8501).
 
-### Build for production
+### Deploy to Streamlit Cloud
 
-```bash
-npm run build
-npm start
-```
+1. Push this repository to GitHub.
+2. Create an app at [share.streamlit.io](https://share.streamlit.io) pointing to `app.py`.
+3. Python version 3.10+ is recommended.
 
-## Folder Structure
+## Sign in
 
-```
-C:\AI Use Cases Arena\
-├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── page.tsx            # Dashboard
-│   │   ├── submit/             # Submit use case form
-│   │   ├── gallery/            # Use case gallery
-│   │   ├── use-cases/[id]/     # Use case detail
-│   │   ├── insights/           # Analytics dashboard
-│   │   ├── leaderboard/        # Gamification leaderboard
-│   │   └── battle/             # Department battle mode
-│   ├── components/
-│   │   ├── ui/                 # shadcn/ui primitives
-│   │   ├── layout/             # Navigation, app shell
-│   │   ├── use-case/           # UseCaseCard, VoteButton
-│   │   ├── gamification/       # Badges, leaderboard cards
-│   │   ├── insights/           # Charts, impact/effort matrix
-│   │   ├── battle/             # Department battle UI
-│   │   └── shared/             # StatCard, PageHeader, etc.
-│   ├── context/
-│   │   └── app-context.tsx     # Global state (localStorage)
-│   ├── data/
-│   │   └── mock-data.ts        # Seed data
-│   ├── hooks/
-│   ├── lib/
-│   │   ├── supabase/           # Supabase client & query stubs
-│   │   ├── scoring.ts          # Innovation score formula
-│   │   └── analytics.ts        # Dashboard aggregations
-│   └── types/
-│       └── index.ts            # TypeScript models
-├── .env.example                # Supabase env template
-└── package.json
-```
+- **Participants:** work email (e.g. `you@invest-nl.nl`)
+- **Administrators:** type `Admin` on the login screen
 
 ## Features
 
-- **Dashboard** with animated hero, stats, trending ideas, quick wins, heatmap
-- **Submit** use cases with confetti and +50 XP
-- **Gallery** with search, filters, and sorting
-- **Detail** pages with voting, comments, AI summary placeholder
-- **Insights** with Recharts and mock executive summary
-- **Leaderboard** with ranks, badges, and XP
-- **Department Battle** competitive rankings
+| Page | Description |
+|------|-------------|
+| **Dashboard** | Stats, trending ideas, quick wins, department heatmap |
+| **Submit Use Case** | Form with scoring on submit (participants only) |
+| **Gallery** | Search, filters, sorting, voting |
+| **Use Case Detail** | Full view, comments, private creator messages, AI summary placeholder |
+| **Insights** | Charts, impact/effort matrix, executive summary |
+| **Admin Leaderboard** | All signed-in users and scores (admin only) |
+| **Department Battle** | Department rankings |
 
-## Gamification (XP)
+## Scoring
 
-| Action | XP |
-|--------|-----|
-| Submit a use case | +50 |
-| Receive a vote | +10 (submitter) |
-| Vote on a use case | +5 |
-| Add a comment | +5 |
+| Action | Points |
+|--------|--------|
+| Submit a use case | +10 |
+| Each vote your idea receives | +2 |
+| Vote on someone else's idea | +1 |
+| Leave a comment | +1 |
 
 ## Innovation Score
 
@@ -103,24 +74,27 @@ C:\AI Use Cases Arena\
 Score = votes × 3 + impact × 20 − effort × 10 + comments × 5 + trendiness bonus
 ```
 
-## Connecting Supabase Later
+## Project Structure
 
-1. Copy `.env.example` to `.env.local` and add your Supabase URL and anon key.
+```
+├── app.py                 # Streamlit entry point
+├── arena/
+│   ├── auth.py            # Login helpers
+│   ├── constants.py       # Departments, categories
+│   ├── scoring.py         # Innovation score formula
+│   ├── analytics.py       # Dashboard aggregations
+│   ├── participants.py    # Leaderboard scoring
+│   ├── store.py           # State mutations
+│   ├── storage.py         # JSON persistence
+│   └── ui/                # Pages and components
+├── data/                  # Runtime state (gitignored)
+├── requirements.txt
+└── .streamlit/config.toml # Invest-NL theme colors
+```
 
-2. Create tables matching the types in `src/types/index.ts`:
-   - `users`, `use_cases`, `votes`, `comments`, `badges`, `user_badges`
+## Data & Privacy
 
-3. Implement queries in `src/lib/supabase/queries.ts`.
-
-4. Replace `AppProvider` localStorage logic in `src/context/app-context.tsx` with async Supabase calls (or use React Query).
-
-5. Add Supabase Auth for real user sessions instead of `CURRENT_USER_ID`.
-
-Suggested schema columns align with the `User`, `UseCase`, `Vote`, and `Comment` interfaces.
-
-## Design
-
-Visual identity inspired by [Invest-NL](https://www.invest-nl.nl/en): dark premium UI, green accent `#8DC63F`, glassmorphism cards, and smooth motion.
+Arena data is stored in `data/arena_state.json` on the server. For production, replace file storage with Supabase or another database using the same schema as the TypeScript types in `src/types/index.ts`.
 
 ## License
 

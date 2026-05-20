@@ -1,46 +1,19 @@
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files
+# Python / Streamlit
+__pycache__/
+*.py[cod]
+.venv/
+venv/
 .env
+data/
+
+# Next.js (legacy)
+node_modules/
+.next/
+out/
+.env.local
 .env*.local
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# vercel
-.vercel
-
-# local build logs
-build-full.log
-build-out.txt
-vercel-build.log
-build-errors-extract.txt
+# IDE
+.idea/
+.vscode/
+*.log

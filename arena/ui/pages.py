@@ -49,11 +49,13 @@ from arena.ui.components import (
     heatmap_html,
     innovation_momentum_card,
     page_header,
+    required_select,
     render_use_case_card,
     render_vote_controls,
     section_heading,
     stat_card,
 )
+from arena.ui.effects import celebrate_submission
 
 
 def render_dashboard(store: ArenaStore, email: str, is_admin: bool) -> None:
@@ -156,36 +158,61 @@ def render_dashboard(store: ArenaStore, email: str, is_admin: bool) -> None:
 
 
 def render_submit(store: ArenaStore, email: str) -> None:
+    st.markdown('<div class="page-submit-marker"></div>', unsafe_allow_html=True)
     page_header(
         "Submit a Use Case",
         "Your idea is saved under your login email. You earn points when others vote.",
+        icon="➕",
     )
 
-    with st.form("submit_form"):
-        title = st.text_input("Title *")
-        description = st.text_area("Description *")
-        business_problem = st.text_area("Business Problem")
-        proposed_solution = st.text_area("Proposed AI Solution")
+    with st.form("submit_form", clear_on_submit=True):
+        title = st.text_input("Title *", placeholder="e.g. AI-Powered Contract Review")
+        description = st.text_area(
+            "Description *", placeholder="Brief overview of the use case"
+        )
+        business_problem = st.text_area(
+            "Business Problem", placeholder="What challenge does this solve?"
+        )
+        proposed_solution = st.text_area(
+            "Proposed AI Solution", placeholder="How would AI address this?"
+        )
         c1, c2 = st.columns(2)
         with c1:
-            department = st.selectbox("Department *", [""] + list(DEPARTMENTS))
-            impact = st.selectbox("Expected Impact *", [""] + list(IMPACT_LEVELS))
+            department = required_select("Department *", list(DEPARTMENTS), "Select department")
+            impact = required_select("Expected Impact *", list(IMPACT_LEVELS), "Impact level")
         with c2:
-            category = st.selectbox("Category *", [""] + list(CATEGORIES))
-            effort = st.selectbox("Effort *", [""] + list(EFFORT_LEVELS))
-        tags = st.text_input("Tags (comma-separated)", placeholder="NLP, Automation, Quick Win")
-        submitted = st.form_submit_button("Submit to Arena", type="primary")
+            category = required_select("Category *", list(CATEGORIES), "Select category")
+            effort = required_select("Effort *", list(EFFORT_LEVELS), "Effort level")
+        tags = st.text_input(
+            "Tags (comma-separated)", placeholder="NLP, Automation, Quick Win"
+        )
+        submitted = st.form_submit_button(
+            "Submit to Arena",
+            type="primary",
+            use_container_width=True,
+        )
         if submitted:
-            if not all([title, description, department, impact, effort, category]):
-                st.error("Please fill in all required fields.")
+            missing = not (
+                title
+                and description
+                and department
+                and impact
+                and effort
+                and category
+            )
+            if missing:
+                st.markdown(
+                    '<p class="form-error">Please fill in all required fields.</p>',
+                    unsafe_allow_html=True,
+                )
             else:
                 store.submit_use_case(
                     email,
                     {
-                        "title": title,
-                        "description": description,
-                        "businessProblem": business_problem,
-                        "proposedSolution": proposed_solution,
+                        "title": title.strip(),
+                        "description": description.strip(),
+                        "businessProblem": business_problem.strip(),
+                        "proposedSolution": proposed_solution.strip(),
                         "department": department,
                         "impact": impact,
                         "effort": effort,
@@ -193,10 +220,7 @@ def render_submit(store: ArenaStore, email: str) -> None:
                         "tags": [t.strip() for t in tags.split(",") if t.strip()],
                     },
                 )
-                st.success(f"+{SCORE_POINTS['submit']} points — your use case is live!")
-                st.balloons()
-                st.session_state["page"] = "Gallery"
-                st.rerun()
+                celebrate_submission(SCORE_POINTS["submit"])
 
 
 def render_gallery(store: ArenaStore, email: str) -> None:
@@ -204,9 +228,15 @@ def render_gallery(store: ArenaStore, email: str) -> None:
     page_header(
         "Use Case Gallery",
         "Discover, vote, and discuss AI ideas from across Invest-NL.",
+        icon="▦",
     )
 
-    search = st.text_input("Search use cases", placeholder="Search...")
+    st.markdown('<p class="field-label">Search use cases</p>', unsafe_allow_html=True)
+    search = st.text_input(
+        "Search use cases",
+        placeholder="Search...",
+        label_visibility="collapsed",
+    )
     c1, c2, c3, c4, c5, c6 = st.columns(6)
     tags = collect_tags(use_cases)
     with c1:
@@ -239,11 +269,20 @@ def render_gallery(store: ArenaStore, email: str) -> None:
     )
 
     if not use_cases:
-        st.info("No use cases yet. Be the first to submit an AI use case.")
+        empty_state(
+            "No use cases yet",
+            "Be the first to submit an AI use case for your team.",
+        )
     elif not filtered:
-        st.warning("No use cases match your filters.")
+        empty_state(
+            "No use cases found",
+            "Try adjusting your filters or search query.",
+        )
     else:
-        st.caption(f"{len(filtered)} use case(s)")
+        st.markdown(
+            f'<p class="result-count">{len(filtered)} use case(s)</p>',
+            unsafe_allow_html=True,
+        )
         for uc in filtered:
             render_use_case_card(store, email, uc)
 
@@ -376,6 +415,7 @@ def render_insights(store: ArenaStore) -> None:
     page_header(
         "Insights & Analytics",
         "Data-driven view of AI innovation across Invest-NL.",
+        icon="📈",
     )
 
     if st.button("Generate AI Executive Summary"):
@@ -475,6 +515,7 @@ def render_leaderboard(store: ArenaStore) -> None:
     page_header(
         "Admin Leaderboard",
         "Overview of signed-in users and arena activity. Ranked by score.",
+        icon="🏆",
     )
     st.info("Admin only. Lists users who signed in, merged with submissions, votes, and scores.")
 
@@ -523,6 +564,7 @@ def render_battle(store: ArenaStore) -> None:
     page_header(
         "Department Battle Mode",
         "Which team will lead the AI transformation?",
+        icon="⚔",
     )
 
     st.markdown(

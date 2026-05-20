@@ -239,12 +239,25 @@ def render_use_case_card(
             st.rerun()
 
 
-def page_header(title: str, subtitle: str) -> None:
+def required_select(
+    label: str, options: list[str], placeholder: str = "Select..."
+) -> str | None:
+    """Selectbox with placeholder row (works on all Streamlit versions)."""
+    choices = [placeholder, *options]
+    picked = st.selectbox(label, choices, index=0)
+    return None if picked == placeholder else picked
+
+
+def page_header(title: str, subtitle: str, *, icon: str = "") -> None:
+    icon_html = (
+        f'<div class="page-header-icon"><span>{icon}</span></div>' if icon else ""
+    )
     st.markdown(
         f"""
         <div class="glass-card page-hero">
-          <h1 class="page-hero-title">{html.escape(title)}</h1>
-          <p class="page-hero-sub">{html.escape(subtitle)}</p>
+          {icon_html}
+          <h1 class="page-header-title">{html.escape(title)}</h1>
+          <p class="page-header-sub">{html.escape(subtitle)}</p>
         </div>
         """,
         unsafe_allow_html=True,

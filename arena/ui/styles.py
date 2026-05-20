@@ -316,13 +316,14 @@ div.stButton > button[kind="secondary"] {{
 }}
 
 .section-heading {{
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
   color: {FOREGROUND};
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.85rem 0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  letter-spacing: -0.01em;
 }}
 
 .section-icon {{
@@ -473,25 +474,111 @@ div.stButton > button[kind="secondary"] {{
   color: {FOREGROUND};
 }}
 
-.uc-desc, .uc-meta {{
+.uc-desc {{
   font-size: 0.875rem;
   color: {MUTED};
   margin: 0.35rem 0;
 }}
 
-.uc-votes {{
+.uc-meta {{
+  font-size: 0.75rem;
+  color: {MUTED};
+  margin: 0.35rem 0 0 0;
+}}
+
+.uc-meta .uc-votes {{
   color: {PRIMARY};
+  font-weight: 600;
 }}
 
-.page-hero-title {{
+.page-header-icon {{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  background: rgba(141, 198, 63, 0.12);
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+}}
+
+.page-header-title {{
   margin: 0 0 0.35rem 0;
-  font-size: 1.75rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: {FOREGROUND} !important;
 }}
 
-.page-hero-sub {{
+.page-header-sub {{
   margin: 0;
   color: {MUTED};
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  max-width: 42rem;
+}}
+
+.field-label {{
+  color: {MUTED};
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin: 0 0 0.35rem 0;
+}}
+
+.result-count {{
+  color: {MUTED};
+  font-size: 0.8rem;
+  margin: 0 0 1rem 0;
+}}
+
+.form-error {{
+  color: #f87171;
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0 0;
+}}
+
+.success-celebration {{
+  text-align: center;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(141, 198, 63, 0.35);
+  background: rgba(141, 198, 63, 0.12);
+  animation: celebrate-in 0.45s ease-out;
+}}
+
+.success-celebration-title {{
+  color: {PRIMARY};
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 0.35rem 0;
+}}
+
+.success-celebration-desc {{
+  color: {MUTED};
+  font-size: 0.875rem;
+  margin: 0;
+}}
+
+@keyframes celebrate-in {{
+  from {{ opacity: 0; transform: translateY(12px) scale(0.96); }}
+  to {{ opacity: 1; transform: translateY(0) scale(1); }}
+}}
+
+body:has(.page-submit-marker) .block-container {{
+  max-width: 48rem;
+}}
+
+div[data-testid="stForm"] label {{
+  color: {MUTED} !important;
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+}}
+
+div[data-testid="stForm"] [data-testid="stFormSubmitButton"] button {{
+  min-height: 2.75rem !important;
+  font-size: 1rem !important;
 }}
 
 /* Sidebar */
@@ -521,14 +608,15 @@ div.stButton > button[kind="secondary"] {{
 .sidebar-brand-title {{
   margin: 0;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: {FOREGROUND};
 }}
 
 .sidebar-brand-sub {{
   margin: 0;
   color: {PRIMARY};
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
 }}
 
 [data-testid="stSidebar"] div.stButton > button {{
@@ -566,33 +654,33 @@ div.stButton > button[kind="secondary"] {{
 
 .sidebar-score-label {{
   color: {MUTED};
-  font-size: 0.75rem;
-  margin: 0 0 0.25rem 0;
+  font-size: 0.7rem;
+  margin: 0 0 0.2rem 0;
 }}
 
 .sidebar-score-value {{
   color: {PRIMARY};
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: 700;
   margin: 0;
 }}
 
 .sidebar-score-value span {{
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 600;
 }}
 
 .sidebar-score-detail {{
-  color: {MUTED};
-  font-size: 0.68rem;
-  line-height: 1.45;
-  margin: 0.5rem 0 0 0;
+  color: rgba(183, 196, 200, 0.75);
+  font-size: 0.62rem;
+  line-height: 1.4;
+  margin: 0.4rem 0 0 0;
 }}
 
 .sidebar-email {{
-  color: {MUTED};
-  font-size: 0.68rem;
-  margin: 0.5rem 0 0 0;
+  color: rgba(183, 196, 200, 0.7);
+  font-size: 0.62rem;
+  margin: 0.35rem 0 0 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -600,9 +688,9 @@ div.stButton > button[kind="secondary"] {{
 
 .leader-badge {{
   color: {PRIMARY};
-  font-size: 0.7rem;
+  font-size: 0.62rem;
   font-weight: 600;
-  margin: 0 0 0.35rem 0;
+  margin: 0 0 0.3rem 0;
 }}
 
 [data-testid="stSidebar"] div.stButton > button[key="sign_out_btn"] {{
@@ -617,29 +705,31 @@ div.stButton > button[kind="secondary"] {{
 
 .about-tool-compact {{
   margin-top: 1rem;
-  padding: 0.85rem;
+  padding: 0.65rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(7, 26, 29, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(7, 26, 29, 0.35);
 }}
 
 .about-title {{
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 600;
-  color: {FOREGROUND};
-  margin: 0 0 0.35rem 0;
+  color: rgba(183, 196, 200, 0.85);
+  margin: 0 0 0.25rem 0;
 }}
 
-.about-body, .about-credit {{
-  font-size: 0.65rem;
-  color: {MUTED};
-  line-height: 1.45;
+.about-body {{
+  font-size: 0.58rem;
+  color: rgba(183, 196, 200, 0.55);
+  line-height: 1.4;
   margin: 0;
 }}
 
 .about-credit {{
-  margin-top: 0.5rem;
-  opacity: 0.75;
+  font-size: 0.55rem;
+  color: rgba(183, 196, 200, 0.45);
+  line-height: 1.35;
+  margin: 0.35rem 0 0 0;
 }}
 
 /* Hide default blue info boxes */

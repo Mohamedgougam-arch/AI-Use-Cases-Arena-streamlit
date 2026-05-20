@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 from typing import Any
 
 import pandas as pd
@@ -41,20 +42,27 @@ from arena.participants import (
 from arena.scoring import is_quick_win
 from arena.store import ArenaStore
 from arena.ui.components import (
+    dashboard_hero,
+    empty_state,
     format_date,
     format_relative_date,
+    heatmap_html,
+    innovation_momentum_card,
     page_header,
     render_use_case_card,
     render_vote_controls,
+    section_heading,
     stat_card,
 )
 
 
 def render_dashboard(store: ArenaStore, email: str, is_admin: bool) -> None:
     use_cases = store.use_cases
-    page_header(
+    dashboard_hero(
         "AI Use Cases Arena" if is_admin else "Your AI Use Cases Arena",
-        "Administrator overview" if is_admin else f"Welcome back · {email}",
+        "Administrator overview" if is_admin else "Welcome back",
+        email,
+        is_admin=is_admin,
     )
 
     total_votes = get_total_votes(use_cases)
@@ -65,71 +73,86 @@ def render_dashboard(store: ArenaStore, email: str, is_admin: bool) -> None:
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        stat_card("Total Use Cases", len(use_cases))
+        stat_card("Total Use Cases", len(use_cases), icon_key="file")
     with c2:
-        stat_card("Total Votes", total_votes)
+        stat_card("Total Votes", total_votes, icon_key="votes")
     with c3:
         stat_card(
             "Top-Ranked Use Case",
             top["votes"] if top else 0,
             (top["title"][:30] + "...") if top else None,
+            icon_key="trophy",
         )
     with c4:
         stat_card(
             "Most Active Department",
             dept_stats[0]["useCaseCount"] if dept_stats else 0,
             dept_stats[0]["department"] if dept_stats else None,
+            icon_key="building",
         )
 
     left, right = st.columns([2, 1])
     with left:
-        st.markdown('<p class="section-title">Trending Use Cases</p>', unsafe_allow_html=True)
+        st.markdown('<div class="panel-glass-start"></div>', unsafe_allow_html=True)
+        col_h, col_link = st.columns([4, 1])
+        with col_h:
+            section_heading("Trending Use Cases", icon="📈")
+        with col_link:
+            if st.button("View all", key="dash_view_gallery"):
+                st.session_state["page"] = "Gallery"
+                st.rerun()
         if not trending:
-            st.info("No use cases yet. Be the first to submit an AI use case.")
+            empty_state(
+                "No use cases yet",
+                "Submissions from teams will appear here once the arena has activity."
+                if is_admin
+                else "Be the first to submit an AI use case for your team.",
+            )
+            if not is_admin and st.button("Submit Use Case", key="dash_empty_submit", type="primary"):
+                st.session_state["page"] = "Submit Use Case"
+                st.rerun()
         else:
             for uc in trending:
                 render_use_case_card(store, email, uc)
 
     with right:
-        st.markdown('<p class="section-title">Quick Wins</p>', unsafe_allow_html=True)
+        st.markdown('<div class="panel-glass-start"></div>', unsafe_allow_html=True)
+        section_heading("Quick Wins", icon="⚡")
+        st.markdown(
+            '<p class="muted-copy panel-sub">High impact, low effort opportunities</p>',
+            unsafe_allow_html=True,
+        )
         if not quick_wins:
-            st.caption("No quick wins identified yet.")
+            st.markdown('<p class="muted-copy">No quick wins identified yet.</p>', unsafe_allow_html=True)
         else:
             for uc in quick_wins[:4]:
-                if st.button(uc["title"], key=f"qw_{uc['id']}"):
+                st.markdown(
+                    f'<p class="qw-title">{html.escape(uc["title"])}</p>'
+                    f'<p class="qw-score">Score {uc["innovationScore"]}</p>',
+                    unsafe_allow_html=True,
+                )
+                if st.button("Open", key=f"qw_{uc['id']}", use_container_width=True):
                     st.session_state["detail_id"] = uc["id"]
                     st.session_state["page"] = "Use Case Detail"
                     st.rerun()
 
-        st.subheader("Hottest Departments")
+        st.markdown('<div class="panel-glass-start panel-spaced"></div>', unsafe_allow_html=True)
+        section_heading("Hottest Departments", icon="🔥", icon_tone="orange")
         if dept_stats:
-            for i, d in enumerate(dept_stats[:5], 1):
-                st.write(f"{i}. **{d['department']}** — {d['innovationScore']} pts")
+            rows = "".join(
+                f'<div class="dept-row"><span>{i + 1}. {html.escape(d["department"])}</span>'
+                f'<strong>{d["innovationScore"]}</strong></div>'
+                for i, d in enumerate(dept_stats[:5])
+            )
+            st.markdown(f'<div class="dept-list">{rows}</div>', unsafe_allow_html=True)
         else:
-            st.caption("No department activity yet.")
+            st.markdown('<p class="muted-copy">No department activity yet.</p>', unsafe_allow_html=True)
 
-        st.metric("Innovation momentum", total_votes, help="Total votes cast")
+        innovation_momentum_card(total_votes, len(use_cases) > 0)
 
-    st.markdown('<p class="section-title">AI Opportunity Heatmap</p>', unsafe_allow_html=True)
-    if dept_stats:
-        df = pd.DataFrame(dept_stats)
-        fig = px.bar(
-            df,
-            x="department",
-            y="useCaseCount",
-            color="innovationScore",
-            color_continuous_scale=["#1a2a1f", "#8DC63F"],
-            title="Use cases by department",
-        )
-        fig.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font_color="#c8d4cc",
-            height=320,
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.caption("Department activity will appear once use cases are submitted.")
+    st.markdown('<div class="panel-glass-start heatmap-panel"></div>', unsafe_allow_html=True)
+    section_heading("AI Opportunity Heatmap")
+    st.markdown(heatmap_html(dept_stats), unsafe_allow_html=True)
 
 
 def render_submit(store: ArenaStore, email: str) -> None:

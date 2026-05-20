@@ -11,15 +11,143 @@ from arena.constants import get_display_department
 from arena.participants import SCORE_POINTS
 from arena.store import ArenaStore
 
+STAT_ICONS = {
+    "file": "📄",
+    "votes": "👍",
+    "trophy": "🏆",
+    "building": "🏢",
+}
 
-def stat_card(label: str, value: str | int, trend: str | None = None) -> None:
-    trend_html = f'<p style="color:#8a9a90;font-size:0.75rem;margin:0.25rem 0 0 0;">{trend}</p>' if trend else ""
+
+def stat_card(
+    label: str,
+    value: str | int,
+    trend: str | None = None,
+    *,
+    icon_key: str = "file",
+) -> None:
+    icon = STAT_ICONS.get(icon_key, "📄")
+    trend_html = (
+        f'<p class="stat-trend">{html.escape(str(trend))}</p>' if trend else ""
+    )
     st.markdown(
-        f"""<div class="stat-card">
-        <p class="label">{label}</p>
-        <p class="value">{value}</p>{trend_html}</div>""",
+        f"""
+        <div class="stat-card glass-card-hover">
+          <div class="stat-card-inner">
+            <div>
+              <p class="stat-label">{html.escape(label)}</p>
+              <p class="stat-value">{html.escape(str(value))}</p>
+              {trend_html}
+            </div>
+            <div class="stat-icon-box">{icon}</div>
+          </div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
+
+
+def dashboard_hero(
+    title: str,
+    welcome: str,
+    email: str,
+    *,
+    is_admin: bool,
+) -> None:
+    st.markdown(
+        f"""
+        <div class="glass-card dashboard-hero">
+          <div class="dashboard-hero-text">
+            <p class="hero-welcome">{html.escape(welcome)}</p>
+            <h1 class="hero-title-main">{html.escape(title)}</h1>
+            <p class="hero-email">{html.escape(email)}</p>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        if not is_admin:
+            if st.button("Submit Use Case →", type="primary", use_container_width=True):
+                st.session_state["page"] = "Submit Use Case"
+                st.rerun()
+    with c2:
+        target = "Admin Leaderboard" if is_admin else "Gallery"
+        label = "Admin Leaderboard" if is_admin else "Browse Gallery"
+        if st.button(label, use_container_width=True):
+            st.session_state["page"] = target
+            st.rerun()
+
+
+def section_heading(title: str, *, icon: str = "", icon_tone: str = "primary") -> None:
+    tone_class = f"section-icon-{icon_tone}"
+    st.markdown(
+        f"""
+        <h2 class="section-heading">
+          <span class="section-icon {tone_class}">{icon}</span>
+          {html.escape(title)}
+        </h2>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def empty_state(title: str, description: str) -> None:
+    st.markdown(
+        f"""
+        <div class="empty-state">
+          <div class="empty-state-icon">📥</div>
+          <p class="empty-state-title">{html.escape(title)}</p>
+          <p class="empty-state-desc">{html.escape(description)}</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def innovation_momentum_card(total_votes: int, has_data: bool) -> None:
+    display = str(total_votes) if has_data else "—"
+    st.markdown(
+        f"""
+        <div class="glass-card momentum-card">
+          <h2 class="momentum-title">Innovation Momentum</h2>
+          <p class="momentum-value text-gradient">{html.escape(display)}</p>
+          <p class="momentum-caption">total votes cast</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def heatmap_html(dept_stats: list[dict[str, Any]]) -> str:
+    if not dept_stats:
+        return (
+            '<p class="muted-copy">Department activity will appear here once '
+            "use cases are submitted.</p>"
+        )
+    cells = []
+    for d in dept_stats:
+        alpha = min(0.4, d["innovationScore"] / 500)
+        dept = html.escape(d["department"])
+        count = d["useCaseCount"]
+        cells.append(
+            f"""
+            <div class="heatmap-cell" style="background:rgba(141,198,63,{alpha});">
+              <p class="heatmap-dept">{dept}</p>
+              <p class="heatmap-count">{count}</p>
+            </div>
+            """
+        )
+    return f'<div class="heatmap-grid">{"".join(cells)}</div>'
+
+
+def quick_win_item(title: str, score: int, uc_id: str) -> None:
+    safe = html.escape(title)
+    if st.button(safe, key=f"qw_{uc_id}", use_container_width=True):
+        st.session_state["detail_id"] = uc_id
+        st.session_state["page"] = "Use Case Detail"
+        st.rerun()
 
 
 def format_relative_date(iso: str) -> str:
@@ -64,8 +192,7 @@ def render_vote_controls(
         else:
             if st.button("♡", key=f"vote_{uc_id}", help="Vote"):
                 if store.vote(email, uc_id):
-                    pts = SCORE_POINTS["voteCast"]
-                    st.toast(f"+{pts} point — vote recorded")
+                    st.toast(f"+{SCORE_POINTS['voteCast']} point — vote recorded")
                 st.rerun()
     with cols[1]:
         st.caption(f"**{use_case['votes']}** votes")
@@ -88,13 +215,14 @@ def render_use_case_card(
     )
     st.markdown(
         f"""
-        <div class="glass-card glass-card-hover" style="margin-bottom:0.75rem;">
-          <h3 style="margin:0 0 0.5rem 0;font-size:1.1rem;">{title}</h3>
+        <div class="glass-card glass-card-hover use-case-card">
+          <h3 class="uc-title">{title}</h3>
           {badges}
-          <p style="color:#b7c4c8;font-size:0.875rem;margin:0.5rem 0 0.75rem 0;">{desc}</p>
-          <p style="color:#8a9a90;font-size:0.75rem;margin:0;">
-            {get_display_department(use_case['department'])} · {use_case['category']} ·
-            Impact {use_case['impact']} · <strong style="color:#8DC63F;">{use_case['votes']} votes</strong>
+          <p class="uc-desc">{desc}</p>
+          <p class="uc-meta">
+            {html.escape(get_display_department(use_case['department']))} ·
+            {html.escape(use_case['category'])} · Impact {html.escape(use_case['impact'])} ·
+            <strong class="uc-votes">{use_case['votes']} votes</strong>
           </p>
         </div>
         """,
@@ -114,9 +242,9 @@ def render_use_case_card(
 def page_header(title: str, subtitle: str) -> None:
     st.markdown(
         f"""
-        <div class="page-hero">
-          <h1 style="margin:0 0 0.35rem 0;font-size:1.75rem;">{title}</h1>
-          <p style="margin:0;color:#b7c4c8;font-size:0.95rem;">{subtitle}</p>
+        <div class="glass-card page-hero">
+          <h1 class="page-hero-title">{html.escape(title)}</h1>
+          <p class="page-hero-sub">{html.escape(subtitle)}</p>
         </div>
         """,
         unsafe_allow_html=True,

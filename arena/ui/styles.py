@@ -37,7 +37,9 @@ header[data-testid="stHeader"] {{
 .block-container {{
   padding-top: 1.25rem;
   padding-bottom: 3rem;
-  max-width: 72rem;
+  max-width: 100rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
 }}
 
 h1, h2, h3, h4 {{
@@ -165,17 +167,40 @@ div.stButton > button[kind="secondary"] {{
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
 }}
 
-.stat-card .label {{
+.stat-card-inner {{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}}
+
+.stat-label {{
   color: {MUTED};
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   margin: 0;
 }}
 
-.stat-card .value {{
-  color: {PRIMARY};
-  font-size: 1.75rem;
+.stat-value {{
+  color: {FOREGROUND} !important;
+  font-size: 1.875rem;
   font-weight: 700;
-  margin: 0.25rem 0 0 0;
+  margin: 0.35rem 0 0 0;
+  line-height: 1.1;
+}}
+
+.stat-trend {{
+  color: {PRIMARY};
+  font-size: 0.75rem;
+  margin: 0.35rem 0 0 0;
+  line-height: 1.3;
+}}
+
+.stat-icon-box {{
+  background: rgba(141, 198, 63, 0.12);
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  font-size: 1.1rem;
+  line-height: 1;
 }}
 
 .badge-pill {{
@@ -245,6 +270,387 @@ div.stButton > button[kind="secondary"] {{
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}}
+
+/* Dashboard hero */
+.dashboard-hero {{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.5rem 2rem !important;
+  margin-bottom: 1.5rem;
+}}
+
+.hero-welcome {{
+  color: {MUTED};
+  font-size: 0.875rem;
+  margin: 0;
+}}
+
+.hero-title-main {{
+  font-size: 1.75rem !important;
+  margin: 0.25rem 0 0 0 !important;
+  color: {FOREGROUND} !important;
+}}
+
+.hero-email {{
+  color: {MUTED};
+  font-size: 0.875rem;
+  margin: 0.35rem 0 0 0;
+}}
+
+/* Glass panels via column marker */
+.panel-glass-start {{
+  display: none;
+}}
+
+[data-testid="stColumn"]:has(.panel-glass-start) > div > div {{
+  background: {CARD};
+  background-image: radial-gradient(ellipse at top left, rgba(141, 198, 63, 0.06), transparent 55%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}}
+
+.section-heading {{
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: {FOREGROUND};
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}}
+
+.section-icon {{
+  font-size: 1.1rem;
+}}
+
+.section-icon-primary {{
+  filter: none;
+}}
+
+.section-icon-orange {{
+  color: #fb923c;
+}}
+
+.muted-copy {{
+  color: {MUTED};
+  font-size: 0.875rem;
+  margin: 0;
+}}
+
+.panel-sub {{
+  margin-top: -0.75rem !important;
+  margin-bottom: 1rem !important;
+}}
+
+.empty-state {{
+  text-align: center;
+  padding: 2.5rem 1rem;
+}}
+
+.empty-state-icon {{
+  font-size: 2.5rem;
+  opacity: 0.45;
+  margin-bottom: 0.75rem;
+}}
+
+.empty-state-title {{
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: {FOREGROUND};
+  margin: 0 0 0.35rem 0;
+}}
+
+.empty-state-desc {{
+  font-size: 0.875rem;
+  color: {MUTED};
+  margin: 0 auto;
+  max-width: 22rem;
+  line-height: 1.5;
+}}
+
+.momentum-card {{
+  padding: 1.5rem !important;
+  margin-top: 0.5rem;
+}}
+
+.momentum-title {{
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: {FOREGROUND};
+}}
+
+.momentum-value {{
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.1;
+}}
+
+.momentum-caption {{
+  color: {MUTED};
+  font-size: 0.875rem;
+  margin: 0.35rem 0 0 0;
+}}
+
+.dept-list {{
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}}
+
+.dept-row {{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: {FOREGROUND};
+}}
+
+.dept-row strong {{
+  color: {PRIMARY};
+  font-weight: 700;
+}}
+
+.qw-title {{
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: {FOREGROUND};
+  margin: 0.75rem 0 0.15rem 0;
+}}
+
+.qw-score {{
+  font-size: 0.75rem;
+  color: {PRIMARY};
+  margin: 0 0 0.25rem 0;
+}}
+
+.heatmap-grid {{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.5rem;
+}}
+
+.heatmap-cell {{
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.5rem;
+  padding: 1rem 0.75rem;
+  text-align: center;
+}}
+
+.heatmap-dept {{
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin: 0;
+  color: {FOREGROUND};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}}
+
+.heatmap-count {{
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0.35rem 0 0 0;
+  color: {FOREGROUND};
+}}
+
+.use-case-card {{
+  padding: 1rem 1.25rem !important;
+  margin-bottom: 0.75rem !important;
+}}
+
+.uc-title {{
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: {FOREGROUND};
+}}
+
+.uc-desc, .uc-meta {{
+  font-size: 0.875rem;
+  color: {MUTED};
+  margin: 0.35rem 0;
+}}
+
+.uc-votes {{
+  color: {PRIMARY};
+}}
+
+.page-hero-title {{
+  margin: 0 0 0.35rem 0;
+  font-size: 1.75rem;
+}}
+
+.page-hero-sub {{
+  margin: 0;
+  color: {MUTED};
+  font-size: 0.95rem;
+}}
+
+/* Sidebar */
+[data-testid="stSidebar"] {{
+  width: 18rem !important;
+  min-width: 18rem !important;
+}}
+
+[data-testid="stSidebar"] > div {{
+  padding: 1rem 1rem 1.5rem;
+}}
+
+.sidebar-brand {{
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}}
+
+.sidebar-brand-icon .logo-box {{
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.35rem;
+  margin-bottom: 0;
+}}
+
+.sidebar-brand-title {{
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: {FOREGROUND};
+}}
+
+.sidebar-brand-sub {{
+  margin: 0;
+  color: {PRIMARY};
+  font-size: 0.75rem;
+}}
+
+[data-testid="stSidebar"] div.stButton > button {{
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: {MUTED} !important;
+  text-align: left !important;
+  justify-content: flex-start !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+  padding: 0.55rem 0.75rem !important;
+  margin-bottom: 0.15rem !important;
+  box-shadow: none !important;
+  width: 100%;
+}}
+
+[data-testid="stSidebar"] div.stButton > button:hover {{
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: {FOREGROUND} !important;
+}}
+
+[data-testid="stSidebar"] div.stButton > button[kind="primary"] {{
+  background: rgba(141, 198, 63, 0.1) !important;
+  border: 1px solid rgba(141, 198, 63, 0.22) !important;
+  color: {PRIMARY} !important;
+}}
+
+.sidebar-score-panel {{
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(7, 26, 29, 0.55);
+}}
+
+.sidebar-score-label {{
+  color: {MUTED};
+  font-size: 0.75rem;
+  margin: 0 0 0.25rem 0;
+}}
+
+.sidebar-score-value {{
+  color: {PRIMARY};
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}}
+
+.sidebar-score-value span {{
+  font-size: 1rem;
+  font-weight: 600;
+}}
+
+.sidebar-score-detail {{
+  color: {MUTED};
+  font-size: 0.68rem;
+  line-height: 1.45;
+  margin: 0.5rem 0 0 0;
+}}
+
+.sidebar-email {{
+  color: {MUTED};
+  font-size: 0.68rem;
+  margin: 0.5rem 0 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}}
+
+.leader-badge {{
+  color: {PRIMARY};
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin: 0 0 0.35rem 0;
+}}
+
+[data-testid="stSidebar"] div.stButton > button[key="sign_out_btn"] {{
+  background: transparent !important;
+  border: none !important;
+  color: {MUTED} !important;
+  text-decoration: underline !important;
+  font-size: 0.75rem !important;
+  padding: 0.5rem 0 !important;
+  margin-top: 0.5rem !important;
+}}
+
+.about-tool-compact {{
+  margin-top: 1rem;
+  padding: 0.85rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(7, 26, 29, 0.45);
+}}
+
+.about-title {{
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: {FOREGROUND};
+  margin: 0 0 0.35rem 0;
+}}
+
+.about-body, .about-credit {{
+  font-size: 0.65rem;
+  color: {MUTED};
+  line-height: 1.45;
+  margin: 0;
+}}
+
+.about-credit {{
+  margin-top: 0.5rem;
+  opacity: 0.75;
+}}
+
+/* Hide default blue info boxes */
+div[data-testid="stAlert"] {{
+  background: {CARD} !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: {MUTED} !important;
+}}
+
+[data-testid="stMetric"] {{
+  display: none;
 }}
 
 /* In-app forms (submit, etc.) */

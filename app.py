@@ -8,17 +8,12 @@ from __future__ import annotations
 
 import streamlit as st
 
-from arena.auth import ADMIN_DISPLAY_NAME
-from arena.participants import (
-    build_participant_scores,
-    get_participant_score,
-    is_participant_score_leader,
-)
 from arena.store import ArenaStore
 from arena.ui import pages
-from arena.ui.brand import LOGO_PATH, logo_box_html
 from arena.ui.login import render_login
+from arena.ui.shell import render_sidebar
 from arena.ui.styles import inject_styles, set_login_body_class
+from arena.ui.brand import LOGO_PATH
 
 _page_icon = str(LOGO_PATH) if LOGO_PATH.is_file() else "✨"
 
@@ -82,64 +77,13 @@ if current not in nav_pages and current != "Use Case Detail":
     current = "Dashboard"
 
 with st.sidebar:
-    st.markdown(
-        f"""
-        <div class="sidebar-logo">
-          {logo_box_html(width=32)}
-          <div>
-            <p style="margin:0;font-weight:700;font-size:0.9rem;color:#f5f7fa;">AI Use Cases</p>
-            <p style="margin:0;color:#8DC63F;font-size:0.75rem;">Arena</p>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    sidebar_index = nav_pages.index(current) if current in nav_pages else 0
-    choice = st.radio(
-        "Navigate",
-        nav_pages,
-        index=sidebar_index,
-        label_visibility="collapsed",
-    )
-    if choice != st.session_state["page"]:
-        st.session_state["page"] = choice
-        st.rerun()
-
-    st.divider()
-
-    if is_admin:
-        st.caption("Administrator mode")
-        st.caption(ADMIN_DISPLAY_NAME)
-    else:
-        scores = store.use_cases
-        my = get_participant_score(scores, email)
-        participants = build_participant_scores(scores)
-        if is_participant_score_leader(email, participants):
-            st.success("🏆 Score leader")
-        st.metric("Your score", f"{my['score'] if my else 0} pts")
-        if my:
-            st.caption(
-                f"{my['submissions']} submitted · "
-                f"{my['votesReceived']} votes on your ideas · "
-                f"{my['votesCast']} votes cast"
-            )
-        st.caption(email or "")
-
-    if st.button("Sign out", use_container_width=True):
-        logout()
-
-    st.markdown(
-        """
-        <div style="margin-top:1rem;padding:0.75rem;border-radius:0.5rem;
-        border:1px solid rgba(255,255,255,0.08);background:rgba(7,26,29,0.5);">
-        <p style="margin:0 0 0.35rem 0;font-size:0.75rem;font-weight:600;">About this tool</p>
-        <p style="margin:0;font-size:0.65rem;color:#b7c4c8;line-height:1.45;">
-        Internal arena to submit, vote on, and prioritize AI use cases across Invest-NL.</p>
-        <p style="margin:0.5rem 0 0 0;font-size:0.6rem;color:rgba(183,196,200,0.65);">
-        Mohamed Gougam · May 2026</p></div>
-        """,
-        unsafe_allow_html=True,
+    render_sidebar(
+        store,
+        email=email,
+        is_admin=is_admin,
+        nav_pages=nav_pages,
+        current=current,
+        on_logout=logout,
     )
 
 page = st.session_state["page"]

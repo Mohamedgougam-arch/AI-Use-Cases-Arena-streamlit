@@ -157,7 +157,12 @@ div.stButton > button[kind="secondary"] {{
   margin: 0 0 0.75rem 0;
 }}
 
-.stat-card {{
+/* KPI stat cards (dashboard) */
+.arena-stat-card {{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
   background: {CARD};
   background-image: radial-gradient(ellipse at top left, rgba(141, 198, 63, 0.06), transparent 50%);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -165,42 +170,65 @@ div.stButton > button[kind="secondary"] {{
   padding: 1.25rem;
   margin-bottom: 0.5rem;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
 }}
 
-.stat-card-inner {{
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.75rem;
+.arena-stat-card:hover {{
+  border-color: rgba(141, 198, 63, 0.35);
+  box-shadow: 0 0 20px rgba(141, 198, 63, 0.12);
 }}
 
-.stat-label {{
+.arena-stat-body {{
+  flex: 1;
+  min-width: 0;
+}}
+
+.arena-stat-label {{
   color: {MUTED};
   font-size: 0.875rem;
   margin: 0;
+  line-height: 1.3;
 }}
 
-.stat-value {{
-  color: {FOREGROUND} !important;
+.arena-stat-value {{
+  color: {FOREGROUND};
   font-size: 1.875rem;
   font-weight: 700;
   margin: 0.35rem 0 0 0;
   line-height: 1.1;
 }}
 
-.stat-trend {{
+.arena-stat-trend {{
   color: {PRIMARY};
   font-size: 0.75rem;
   margin: 0.35rem 0 0 0;
   line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }}
 
-.stat-icon-box {{
+.arena-stat-icon {{
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: rgba(141, 198, 63, 0.12);
   border-radius: 0.5rem;
-  padding: 0.55rem 0.65rem;
-  font-size: 1.1rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.15rem;
   line-height: 1;
+}}
+
+/* st.html iframe: remove extra chrome around stat cards */
+div[data-testid="stHtml"] {{
+  background: transparent !important;
+}}
+
+div[data-testid="stHtml"] iframe {{
+  background: transparent !important;
 }}
 
 .badge-pill {{

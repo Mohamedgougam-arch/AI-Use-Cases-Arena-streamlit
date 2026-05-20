@@ -1,5 +1,7 @@
 # AI Use Cases Arena (Streamlit)
 
+**Repository:** [github.com/Mohamedgougam-arch/AI-Use-Cases-Arena-streamlit](https://github.com/Mohamedgougam-arch/AI-Use-Cases-Arena-streamlit)
+
 A gamified collaborative platform for Invest-NL business users to submit, browse, vote on, and prioritize AI use cases. Rebuilt in **Python** with **Streamlit** for easy internal hosting.
 
 ## Tech Stack
@@ -38,7 +40,7 @@ Open the URL shown in the terminal (typically http://localhost:8501).
 
 ### Deploy to Streamlit Cloud
 
-1. Push this repository to GitHub.
+1. Use the GitHub repo [AI-Use-Cases-Arena-streamlit](https://github.com/Mohamedgougam-arch/AI-Use-Cases-Arena-streamlit).
 2. Create an app at [share.streamlit.io](https://share.streamlit.io) pointing to `app.py`.
 3. Python version 3.10+ is recommended.
 

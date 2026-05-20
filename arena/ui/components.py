@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 from datetime import datetime, timezone
 from typing import Any
 
@@ -77,34 +78,46 @@ def render_use_case_card(
     *,
     show_vote: bool = True,
 ) -> None:
-    with st.container():
-        st.markdown(f"### {use_case['title']}")
-        badges = " ".join(f'<span class="badge-pill">{b}</span>' for b in use_case.get("badges", []))
-        if badges:
-            st.markdown(badges, unsafe_allow_html=True)
-        st.caption(use_case["description"][:200] + ("..." if len(use_case["description"]) > 200 else ""))
-        meta = (
-            f"{get_display_department(use_case['department'])} · "
-            f"{use_case['category']} · Impact {use_case['impact']} · "
-            f"{use_case['votes']} votes · {len(use_case.get('comments', []))} comments"
-        )
-        st.caption(meta)
-        st.caption(
-            f"by {use_case.get('submitterEmail') or use_case.get('submitter', '')} · "
-            f"{format_relative_date(use_case['createdAt'])} · Score {use_case['innovationScore']}"
-        )
-        c1, c2 = st.columns([1, 1])
-        with c1:
-            if show_vote:
-                render_vote_controls(store, email, use_case, compact=True)
-        with c2:
-            if st.button("View details", key=f"detail_{use_case['id']}"):
-                st.session_state["detail_id"] = use_case["id"]
-                st.session_state["page"] = "Use Case Detail"
-                st.rerun()
-        st.divider()
+    title = html.escape(use_case["title"])
+    desc = html.escape(use_case["description"])
+    if len(desc) > 200:
+        desc = desc[:200] + "..."
+    badges = " ".join(
+        f'<span class="badge-pill">{html.escape(b)}</span>'
+        for b in use_case.get("badges", [])
+    )
+    st.markdown(
+        f"""
+        <div class="glass-card glass-card-hover" style="margin-bottom:0.75rem;">
+          <h3 style="margin:0 0 0.5rem 0;font-size:1.1rem;">{title}</h3>
+          {badges}
+          <p style="color:#b7c4c8;font-size:0.875rem;margin:0.5rem 0 0.75rem 0;">{desc}</p>
+          <p style="color:#8a9a90;font-size:0.75rem;margin:0;">
+            {get_display_department(use_case['department'])} · {use_case['category']} ·
+            Impact {use_case['impact']} · <strong style="color:#8DC63F;">{use_case['votes']} votes</strong>
+          </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        if show_vote:
+            render_vote_controls(store, email, use_case, compact=True)
+    with c2:
+        if st.button("View details", key=f"detail_{use_case['id']}"):
+            st.session_state["detail_id"] = use_case["id"]
+            st.session_state["page"] = "Use Case Detail"
+            st.rerun()
 
 
 def page_header(title: str, subtitle: str) -> None:
-    st.title(title)
-    st.caption(subtitle)
+    st.markdown(
+        f"""
+        <div class="page-hero">
+          <h1 style="margin:0 0 0.35rem 0;font-size:1.75rem;">{title}</h1>
+          <p style="margin:0;color:#b7c4c8;font-size:0.95rem;">{subtitle}</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )

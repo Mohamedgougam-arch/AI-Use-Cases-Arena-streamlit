@@ -50,51 +50,6 @@ from arena.ui.components import (
 )
 
 
-def render_login() -> None:
-    st.markdown(
-        '<p class="hero-title" style="font-size:2.5rem;">Shape the future of AI at Invest-NL</p>',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        "Submit, explore, vote, and prioritize the AI use cases that can transform our organization."
-    )
-
-    col1, col2 = st.columns([1.2, 1])
-    with col1:
-        st.markdown("**Submit ideas** — Share AI use cases from your team.")
-        st.markdown("**Vote and prioritize** — Vote or remove your vote anytime.")
-        st.markdown("**Track contribution** — See your impact on the leaderboard.")
-
-    with col2:
-        st.markdown('<div class="login-box">', unsafe_allow_html=True)
-        st.subheader("Sign in to continue")
-        st.caption("Use your work email, or type **Admin** for administrator access.")
-        email_input = st.text_input(
-            "Work email or Admin",
-            placeholder="you@invest-nl.nl or Admin",
-            key="login_input",
-        )
-        if st.button("Continue to Arena", type="primary", use_container_width=True):
-            from arena.auth import try_login
-
-            ok, email, is_admin = try_login(email_input)
-            if ok and email:
-                st.session_state["auth_email"] = email
-                st.session_state["auth_is_admin"] = is_admin
-                store: ArenaStore = st.session_state["store"]
-                if not is_admin:
-                    store.register_login(email)
-                st.session_state["page"] = "Dashboard"
-                st.rerun()
-            else:
-                st.error("Enter a valid work email or Admin for administrator access.")
-        st.caption(
-            "GDPR: your email is used only to operate this arena (submissions, votes, comments). "
-            "Not used for marketing or sold to third parties."
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
-
-
 def render_dashboard(store: ArenaStore, email: str, is_admin: bool) -> None:
     use_cases = store.use_cases
     page_header(
@@ -128,7 +83,7 @@ def render_dashboard(store: ArenaStore, email: str, is_admin: bool) -> None:
 
     left, right = st.columns([2, 1])
     with left:
-        st.subheader("Trending Use Cases")
+        st.markdown('<p class="section-title">Trending Use Cases</p>', unsafe_allow_html=True)
         if not trending:
             st.info("No use cases yet. Be the first to submit an AI use case.")
         else:
@@ -136,7 +91,7 @@ def render_dashboard(store: ArenaStore, email: str, is_admin: bool) -> None:
                 render_use_case_card(store, email, uc)
 
     with right:
-        st.subheader("Quick Wins")
+        st.markdown('<p class="section-title">Quick Wins</p>', unsafe_allow_html=True)
         if not quick_wins:
             st.caption("No quick wins identified yet.")
         else:
@@ -155,7 +110,7 @@ def render_dashboard(store: ArenaStore, email: str, is_admin: bool) -> None:
 
         st.metric("Innovation momentum", total_votes, help="Total votes cast")
 
-    st.subheader("AI Opportunity Heatmap")
+    st.markdown('<p class="section-title">AI Opportunity Heatmap</p>', unsafe_allow_html=True)
     if dept_stats:
         df = pd.DataFrame(dept_stats)
         fig = px.bar(

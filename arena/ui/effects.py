@@ -3,12 +3,12 @@ from __future__ import annotations
 import time
 
 import streamlit as st
-import streamlit.components.v1 as components
+import streamlit.components.v1 as st_components
 
 
 def fire_confetti() -> None:
     """Invest-NL colored confetti (matches Vercel canvas-confetti)."""
-    components.html(
+    st_components.html(
         """
         <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
         <script>

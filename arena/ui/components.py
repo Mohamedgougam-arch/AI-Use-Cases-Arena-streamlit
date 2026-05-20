@@ -30,25 +30,27 @@ def stat_card(
     icon = STAT_ICONS.get(icon_key, "📄")
     safe_label = html.escape(label)
     safe_value = html.escape(str(value))
-    trend_html = (
-        f'<p style="margin:0.35rem 0 0 0;color:#8DC63F;font-size:0.75rem;line-height:1.3;'
-        f"overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"
-        f"{html.escape(str(trend))}</p>"
-        if trend
-        else ""
-    )
+    if trend:
+        safe_trend = html.escape(str(trend))
+        trend_html = (
+            "<p style=\"margin:0.35rem 0 0 0;color:#8DC63F;font-size:0.75rem;"
+            "line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;\">"
+            f"{safe_trend}</p>"
+        )
+    else:
+        trend_html = ""
     card = (
-        '<div class="arena-stat-card" style="display:flex;justify-content:space-between;'
-        "align-items:flex-start;gap:0.75rem;background:rgba(14,42,47,0.82);"
-        "border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:1.25rem;"
-        'margin-bottom:0.5rem;box-shadow:0 4px 24px rgba(0,0,0,0.2);">'
-        '<div style="flex:1;min-width:0;">'
-        f'<p style="margin:0;color:#b7c4c8;font-size:0.875rem;">{safe_label}</p>'
-        f'<p style="margin:0.35rem 0 0 0;color:#f5f7fa;font-size:1.875rem;font-weight:700;'
-        f'line-height:1.1;">{safe_value}</p>{trend_html}</div>'
-        '<span style="flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;'
+        "<div style=\"display:flex;justify-content:space-between;align-items:flex-start;"
+        "gap:0.75rem;background:rgba(14,42,47,0.82);border:1px solid rgba(255,255,255,0.1);"
+        "border-radius:12px;padding:1.25rem;margin-bottom:0.5rem;box-shadow:0 4px 24px rgba(0,0,0,0.2);\">"
+        "<div style=\"flex:1;min-width:0;\">"
+        f"<p style=\"margin:0;color:#b7c4c8;font-size:0.875rem;\">{safe_label}</p>"
+        "<p style=\"margin:0.35rem 0 0 0;color:#f5f7fa;font-size:1.875rem;font-weight:700;"
+        f"line-height:1.1;\">{safe_value}</p>"
+        f"{trend_html}</div>"
+        "<span style=\"flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;"
         "width:2.5rem;height:2.5rem;border-radius:0.5rem;background:rgba(141,198,63,0.12);"
-        f'font-size:1.15rem;">{icon}</span></div>'
+        f"font-size:1.15rem;\">{icon}</span></div>"
     )
     st.markdown(card, unsafe_allow_html=True)
 

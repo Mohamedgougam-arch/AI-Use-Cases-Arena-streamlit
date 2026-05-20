@@ -303,10 +303,38 @@ body.arena-login-active .main .block-container {{
   justify-content: center;
   width: 4rem;
   height: 4rem;
+  padding: 0.5rem;
   border-radius: 1rem;
   background: #fff;
   box-shadow: 0 0 20px rgba(141, 198, 63, 0.15);
   margin-bottom: 1.5rem;
+}}
+
+.logo-box img {{
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}}
+
+.logo-box-fallback {{
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #3d4548;
+  letter-spacing: -0.05em;
+}}
+
+.sidebar-logo {{
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}}
+
+.sidebar-logo .logo-box {{
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.35rem;
+  margin-bottom: 0;
 }}
 
 .login-hero h1 {{

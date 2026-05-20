@@ -16,12 +16,15 @@ from arena.participants import (
 )
 from arena.store import ArenaStore
 from arena.ui import pages
+from arena.ui.brand import LOGO_PATH, logo_box_html
 from arena.ui.login import render_login
 from arena.ui.styles import inject_styles, set_login_body_class
 
+_page_icon = str(LOGO_PATH) if LOGO_PATH.is_file() else "✨"
+
 st.set_page_config(
     page_title="AI Use Cases Arena",
-    page_icon="✨",
+    page_icon=_page_icon,
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -80,12 +83,13 @@ if current not in nav_pages and current != "Use Case Detail":
 
 with st.sidebar:
     st.markdown(
-        """
-        <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;">
-          <span style="display:inline-flex;width:2.25rem;height:2.25rem;border-radius:0.6rem;
-          background:rgba(141,198,63,0.2);align-items:center;justify-content:center;">✨</span>
-          <div><p style="margin:0;font-weight:700;font-size:0.9rem;">AI Use Cases</p>
-          <p style="margin:0;color:#8DC63F;font-size:0.75rem;">Arena</p></div>
+        f"""
+        <div class="sidebar-logo">
+          {logo_box_html(width=32)}
+          <div>
+            <p style="margin:0;font-weight:700;font-size:0.9rem;color:#f5f7fa;">AI Use Cases</p>
+            <p style="margin:0;color:#8DC63F;font-size:0.75rem;">Arena</p>
+          </div>
         </div>
         """,
         unsafe_allow_html=True,

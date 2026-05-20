@@ -2,16 +2,8 @@ from __future__ import annotations
 
 import streamlit as st
 
+from arena.ui.brand import logo_box_html
 from arena.ui.styles import set_login_body_class
-
-LOGO_SVG = """
-<svg width="40" height="40" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <rect x="4" y="8" width="8" height="32" rx="2" fill="#8DC63F"/>
-  <rect x="16" y="14" width="8" height="26" rx="2" fill="#1F6F78"/>
-  <rect x="28" y="6" width="8" height="34" rx="2" fill="#8DC63F"/>
-  <rect x="40" y="18" width="4" height="22" rx="1" fill="#A8E063"/>
-</svg>
-"""
 
 HIGHLIGHTS = [
     ("📄", "Submit ideas", "Share AI use cases from your team at Invest-NL."),
@@ -41,7 +33,7 @@ def render_login() -> None:
         st.markdown(
             f"""
             <div class="login-hero">
-              <div class="logo-box">{LOGO_SVG}</div>
+              {logo_box_html(width=48)}
               <p class="eyebrow">Invest-NL Innovation Arena</p>
               <h1>Shape the future of <span class="text-gradient">AI at Invest-NL</span></h1>
               <p class="lead">Submit, explore, vote, and prioritize the AI use cases that can

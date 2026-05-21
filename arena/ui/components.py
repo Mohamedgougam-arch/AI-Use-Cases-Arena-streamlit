@@ -18,6 +18,58 @@ STAT_ICONS = {
     "building": "🏢",
 }
 
+# Matches src/components/ui/badge.tsx variants (inline styles avoid sanitiser glitches).
+BADGE_PALETTE: dict[str, tuple[str, str, str]] = {
+    "Trending": ("rgba(249, 115, 22, 0.12)", "rgba(249, 115, 22, 0.35)", "#fb923c"),
+    "High Impact": ("rgba(16, 185, 129, 0.12)", "rgba(16, 185, 129, 0.35)", "#34d399"),
+    "Quick Win": ("rgba(6, 182, 212, 0.12)", "rgba(6, 182, 212, 0.35)", "#22d3ee"),
+    "Strategic Bet": ("rgba(168, 85, 247, 0.12)", "rgba(168, 85, 247, 0.35)", "#c084fc"),
+    "Crowd Favorite": ("rgba(236, 72, 153, 0.12)", "rgba(236, 72, 153, 0.35)", "#f472b6"),
+}
+
+
+def _badge_span(label: str) -> str:
+    bg, border, color = BADGE_PALETTE.get(
+        label, ("rgba(31, 111, 120, 0.2)", "rgba(31, 111, 120, 0.35)", "#c8e6ea")
+    )
+    safe = html.escape(label)
+    return (
+        "<span style=\"display:inline-block;box-sizing:border-box;margin:0 0.35rem 0.35rem 0;"
+        "padding:0.15rem 0.6rem;border-radius:999px;font-size:0.7rem;font-weight:600;"
+        f"line-height:1.35;background:{bg};color:{color};border:1px solid {border};\">"
+        f"{safe}</span>"
+    )
+
+
+def _meta_pill(text: str) -> str:
+    safe = html.escape(text)
+    return (
+        "<span style=\"display:inline-block;box-sizing:border-box;margin:0 0.35rem 0.35rem 0;"
+        "padding:0.15rem 0.5rem;border-radius:0.375rem;font-size:0.75rem;"
+        "background:rgba(31,111,120,0.3);color:#c8e6ea;\">"
+        f"{safe}</span>"
+    )
+
+
+def _date_badge(iso: str) -> str:
+    safe = html.escape(format_date(iso))
+    return (
+        "<span style=\"display:inline-flex;align-items:center;gap:0.25rem;box-sizing:border-box;"
+        "padding:0.15rem 0.5rem;border-radius:0.375rem;font-size:0.7rem;font-weight:500;"
+        "color:#b7c4c8;border:1px solid rgba(255,255,255,0.12);background:rgba(245,247,250,0.05);\">"
+        f"📅 {safe}</span>"
+    )
+
+
+def _status_badge(status: str) -> str:
+    safe = html.escape(status)
+    return (
+        "<span style=\"display:inline-block;box-sizing:border-box;padding:0.15rem 0.5rem;"
+        "border-radius:0.375rem;font-size:0.7rem;font-weight:500;color:#b7c4c8;"
+        "border:1px solid rgba(255,255,255,0.1);background:rgba(14,42,47,0.6);\">"
+        f"{safe}</span>"
+    )
+
 
 def stat_card(
     label: str,
@@ -186,9 +238,30 @@ def format_date(iso: str) -> str:
         return iso[:10]
 
 
+def render_vote_box(store: ArenaStore, email: str, use_case: dict[str, Any]) -> None:
+    """Vertical vote control (matches Vercel VoteButton compact)."""
+    uc_id = use_case["id"]
+    voted = store.has_voted(email, uc_id)
+    st.markdown('<span class="vote-box-marker"></span>', unsafe_allow_html=True)
+    icon = "▼" if voted else "▲"
+    if voted:
+        if st.button(icon, key=f"unvote_{uc_id}", help="Remove vote", type="primary"):
+            store.unvote(email, uc_id)
+            st.rerun()
+    elif st.button(icon, key=f"vote_{uc_id}", help="Vote"):
+        if store.vote(email, uc_id):
+            st.toast(f"+{SCORE_POINTS['voteCast']} point — vote recorded")
+        st.rerun()
+    st.markdown(
+        f'<p class="vote-count-caption">{use_case["votes"]}</p>',
+        unsafe_allow_html=True,
+    )
+
+
 def render_vote_controls(
     store: ArenaStore, email: str, use_case: dict[str, Any], *, compact: bool = False
 ) -> None:
+    """Horizontal vote controls for detail page."""
     uc_id = use_case["id"]
     voted = store.has_voted(email, uc_id)
     cols = st.columns([1, 2] if compact else [1, 3])
@@ -217,31 +290,60 @@ def render_use_case_card(
     desc = html.escape(use_case["description"])
     if len(desc) > 200:
         desc = desc[:200] + "..."
-    badges = " ".join(
-        f'<span class="badge-pill">{html.escape(b)}</span>'
-        for b in use_case.get("badges", [])
+    badge_row = "".join(_badge_span(b) for b in use_case.get("badges", []))
+    popular = ""
+    if use_case["votes"] >= 5:
+        popular = _badge_span(f"Popular · {use_case['votes']} votes")
+    tags = use_case.get("tags") or []
+    tag_row = " ".join(
+        "<span style=\"display:inline-block;margin:0 0.25rem 0.25rem 0;padding:0.1rem 0.45rem;"
+        "border-radius:999px;font-size:0.7rem;color:#b7c4c8;background:rgba(255,255,255,0.06);\">"
+        f"#{html.escape(t)}</span>"
+        for t in tags[:3]
     )
-    st.markdown(
-        f"""
-        <div class="glass-card glass-card-hover use-case-card">
-          <h3 class="uc-title">{title}</h3>
-          {badges}
-          <p class="uc-desc">{desc}</p>
-          <p class="uc-meta">
-            {html.escape(get_display_department(use_case['department']))} ·
-            {html.escape(use_case['category'])} · Impact {html.escape(use_case['impact'])} ·
-            <strong class="uc-votes">{use_case['votes']} votes</strong>
-          </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    submitter = html.escape(
+        use_case.get("submitterEmail") or use_case.get("submitter") or "Unknown"
     )
-    c1, c2 = st.columns([1, 1])
-    with c1:
+    rel_date = html.escape(format_relative_date(use_case["createdAt"]))
+    comments = len(use_case.get("comments", []))
+    card_shell = (
+        "<div style=\"box-sizing:border-box;background:rgba(14,42,47,0.82);"
+        "border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:1rem 1.25rem;"
+        "margin-bottom:0.25rem;box-shadow:0 4px 24px rgba(0,0,0,0.2);\">"
+        "<div style=\"display:flex;justify-content:space-between;align-items:flex-start;"
+        "gap:0.75rem;margin-bottom:0.5rem;\">"
+        f"<h3 style=\"margin:0;font-size:1rem;font-weight:700;color:#f5f7fa;"
+        f"line-height:1.3;flex:1;min-width:0;\">{title}</h3>"
+        "<div style=\"display:flex;flex-wrap:wrap;gap:0.35rem;justify-content:flex-end;"
+        "flex-shrink:0;\">"
+        f"{_date_badge(use_case['createdAt'])}"
+        f"{_status_badge(use_case.get('status', 'Submitted'))}"
+        "</div></div>"
+        f"<p style=\"margin:0 0 0.5rem 0;font-size:0.875rem;color:#b7c4c8;line-height:1.45;\">{desc}</p>"
+        f"{popular}"
+        f"<div style=\"margin:0.35rem 0 0.5rem 0;line-height:1.6;\">{badge_row}</div>"
+        "<div style=\"display:flex;flex-wrap:wrap;align-items:center;gap:0.25rem 0.65rem;"
+        "font-size:0.75rem;color:#b7c4c8;\">"
+        f"{_meta_pill(get_display_department(use_case['department']))}"
+        f"<span>{html.escape(use_case['category'])}</span>"
+        f"<span>Impact: {html.escape(use_case['impact'])}</span>"
+        f"<span>Effort: {html.escape(use_case['effort'])}</span>"
+        f"<span>💬 {comments}</span>"
+        f"<span style=\"color:#8DC63F;font-weight:600;\">{use_case['votes']} votes</span>"
+        "</div>"
+        f"<p style=\"margin:0.65rem 0 0 0;font-size:0.7rem;color:#8a9a90;\">"
+        f"by {submitter} · {rel_date}</p>"
+        f"<div style=\"margin-top:0.35rem;\">{tag_row}</div>"
+        "</div>"
+    )
+    st.markdown('<div class="uc-card-wrap"><span class="uc-card-marker"></span></div>', unsafe_allow_html=True)
+    col_vote, col_body = st.columns([1, 11], gap="small")
+    with col_vote:
         if show_vote:
-            render_vote_controls(store, email, use_case, compact=True)
-    with c2:
-        if st.button("View details", key=f"detail_{use_case['id']}"):
+            render_vote_box(store, email, use_case)
+    with col_body:
+        st.markdown(card_shell, unsafe_allow_html=True)
+        if st.button("View details", key=f"detail_{use_case['id']}", use_container_width=True):
             st.session_state["detail_id"] = use_case["id"]
             st.session_state["page"] = "Use Case Detail"
             st.rerun()

@@ -231,15 +231,56 @@ div[data-testid="stHtml"] iframe {{
   background: transparent !important;
 }}
 
-.badge-pill {{
-  display: inline-block;
-  background: rgba(141, 198, 63, 0.15);
-  color: {PRIMARY};
-  border-radius: 999px;
-  padding: 0.2rem 0.65rem;
-  font-size: 0.75rem;
-  margin-right: 0.35rem;
-  border: 1px solid rgba(141, 198, 63, 0.2);
+/* Use-case list cards (Vercel UseCaseCard layout) */
+.uc-card-wrap {{
+  margin-bottom: 0.75rem;
+}}
+
+.uc-card-marker + div [data-testid="stVerticalBlock"] {{
+  gap: 0.35rem;
+}}
+
+div[data-testid="column"]:has(.vote-box-marker) {{
+  flex: 0 0 auto !important;
+  min-width: 3.25rem !important;
+  max-width: 3.5rem !important;
+}}
+
+div[data-testid="column"]:has(.vote-box-marker) div.stButton > button {{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 3rem;
+  min-height: 3.25rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.75rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(245, 247, 250, 0.05) !important;
+  color: {MUTED} !important;
+  font-size: 1rem !important;
+  line-height: 1.1 !important;
+}}
+
+div[data-testid="column"]:has(.vote-box-marker) div.stButton > button:hover {{
+  border-color: rgba(141, 198, 63, 0.4) !important;
+  background: rgba(141, 198, 63, 0.1) !important;
+  color: {PRIMARY} !important;
+}}
+
+div[data-testid="column"]:has(.vote-box-marker) div.stButton > button[kind="primary"] {{
+  border-color: rgba(141, 198, 63, 0.5) !important;
+  background: rgba(141, 198, 63, 0.2) !important;
+  color: {PRIMARY} !important;
+  box-shadow: 0 0 12px rgba(141, 198, 63, 0.15);
+}}
+
+.vote-count-caption {{
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: {FOREGROUND};
+  margin: 0.15rem 0 0 0;
 }}
 
 .page-hero {{
@@ -941,12 +982,16 @@ body.arena-login-active .gdpr-notice {{
 """
 
 
-def inject_styles(*, login: bool = False) -> None:
+def inject_styles(*, login: bool = False, clear_effects: bool = True) -> None:
     import streamlit as st
+
+    from arena.ui.effects import clear_celebration_effects
 
     st.markdown(BASE_CSS, unsafe_allow_html=True)
     if login:
         st.markdown(LOGIN_CSS, unsafe_allow_html=True)
+    elif clear_effects:
+        clear_celebration_effects()
 
 
 def set_login_body_class(active: bool) -> None:

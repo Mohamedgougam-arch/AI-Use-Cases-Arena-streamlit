@@ -42,7 +42,7 @@ def _score_panel_html(store: ArenaStore, email: str | None, is_admin: bool) -> s
         my = get_participant_score(store.use_cases, email)
         participants = build_participant_scores(store.use_cases)
         leader = (
-            '<p class="leader-badge">🏆 Top score</p>'
+            '<p class="leader-badge">👑 Arena leader</p>'
             if is_participant_score_leader(email, participants)
             else ""
         )

@@ -42,12 +42,66 @@ def _badge_span(label: str) -> str:
 
 
 def _meta_pill(text: str) -> str:
+    """Department chip (Vercel bg-secondary/30)."""
     safe = html.escape(text)
     return (
-        "<span style=\"display:inline-block;box-sizing:border-box;margin:0 0.35rem 0.35rem 0;"
-        "padding:0.15rem 0.5rem;border-radius:0.375rem;font-size:0.75rem;"
-        "background:rgba(31,111,120,0.3);color:#c8e6ea;\">"
+        "<span style=\"display:inline-block;box-sizing:border-box;margin:0 0.5rem 0.25rem 0;"
+        "padding:0.15rem 0.5rem;border-radius:0.375rem;font-size:0.75rem;line-height:1.35;"
+        "background:rgba(31,111,120,0.3);color:#c8e6ea;border:none;\">"
         f"{safe}</span>"
+    )
+
+
+def _meta_outline_chip(text: str) -> str:
+    """Category / status chip (Vercel outline badge)."""
+    safe = html.escape(text)
+    return (
+        "<span style=\"display:inline-block;box-sizing:border-box;margin:0 0.5rem 0.25rem 0;"
+        "padding:0.15rem 0.5rem;border-radius:0.375rem;font-size:0.75rem;line-height:1.35;"
+        "color:#b7c4c8;border:1px solid rgba(255,255,255,0.12);"
+        "background:rgba(14,42,47,0.55);\">"
+        f"{safe}</span>"
+    )
+
+
+def _meta_text(label: str, value: str) -> str:
+    safe = html.escape(f"{label}: {value}")
+    return (
+        "<span style=\"display:inline-block;box-sizing:border-box;margin:0 0.5rem 0.25rem 0;"
+        "font-size:0.75rem;line-height:1.35;color:#b7c4c8;white-space:nowrap;\">"
+        f"{safe}</span>"
+    )
+
+
+def _meta_votes(count: int) -> str:
+    return (
+        "<span style=\"display:inline-block;box-sizing:border-box;margin:0 0.5rem 0.25rem 0;"
+        "font-size:0.75rem;line-height:1.35;color:#8DC63F;font-weight:600;white-space:nowrap;\">"
+        f"{count} votes</span>"
+    )
+
+
+def _meta_comments(count: int) -> str:
+    return (
+        "<span style=\"display:inline-block;box-sizing:border-box;margin:0 0.5rem 0.25rem 0;"
+        "font-size:0.75rem;line-height:1.35;color:#b7c4c8;white-space:nowrap;\">"
+        f"💬 {count}</span>"
+    )
+
+
+def _meta_line(use_case: dict[str, Any]) -> str:
+    """Single-line metadata row (all inline styles for Streamlit sanitizer)."""
+    parts = [
+        _meta_pill(get_display_department(use_case["department"])),
+        _meta_outline_chip(use_case["category"]),
+        _meta_text("Impact", use_case["impact"]),
+        _meta_text("Effort", use_case["effort"]),
+        _meta_comments(len(use_case.get("comments", []))),
+        _meta_votes(use_case["votes"]),
+    ]
+    return (
+        "<p style=\"margin:0.5rem 0 0 0;padding:0;line-height:1.9;\">"
+        f"{''.join(parts)}</p>"
     )
 
 
@@ -114,28 +168,27 @@ def dashboard_hero(
     *,
     is_admin: bool,
 ) -> None:
-    st.markdown(
-        f"""
-        <div class="glass-card dashboard-hero">
-          <div class="dashboard-hero-text">
-            <p class="hero-welcome">{html.escape(welcome)}</p>
-            <h1 class="hero-title-main">{html.escape(title)}</h1>
-            <p class="hero-email">{html.escape(email)}</p>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    c1, c2 = st.columns([1, 1])
-    with c1:
+    """Hero banner with CTAs on the right (Vercel dashboard-home)."""
+    st.markdown('<span class="hero-panel-marker"></span>', unsafe_allow_html=True)
+    text_col, btn_col = st.columns([2.4, 1], gap="large")
+    with text_col:
+        st.markdown(
+            f"<p style=\"margin:0;color:#b7c4c8;font-size:0.875rem;\">{html.escape(welcome)}</p>"
+            f"<h1 style=\"margin:0.25rem 0 0 0;color:#f5f7fa;font-size:1.75rem;font-weight:700;"
+            f"letter-spacing:-0.02em;\">{html.escape(title)}</h1>"
+            f"<p style=\"margin:0.35rem 0 0 0;color:#b7c4c8;font-size:0.875rem;"
+            f"max-width:28rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;\">"
+            f"{html.escape(email)}</p>",
+            unsafe_allow_html=True,
+        )
+    with btn_col:
         if not is_admin:
             if st.button("Submit Use Case →", type="primary", use_container_width=True):
                 st.session_state["page"] = "Submit Use Case"
                 st.rerun()
-    with c2:
         target = "Admin Leaderboard" if is_admin else "Gallery"
         label = "Admin Leaderboard" if is_admin else "Browse Gallery"
-        if st.button(label, use_container_width=True):
+        if st.button(label, type="secondary", use_container_width=True):
             st.session_state["page"] = target
             st.rerun()
 
@@ -285,19 +338,25 @@ def render_use_case_card(
     use_case: dict[str, Any],
     *,
     show_vote: bool = True,
+    show_detail_button: bool = True,
 ) -> None:
+    """List card matching Vercel UseCaseCard (vote left, content right, one glass row)."""
     title = html.escape(use_case["title"])
     desc = html.escape(use_case["description"])
     if len(desc) > 200:
         desc = desc[:200] + "..."
-    badge_row = "".join(_badge_span(b) for b in use_case.get("badges", []))
     popular = ""
     if use_case["votes"] >= 5:
-        popular = _badge_span(f"Popular · {use_case['votes']} votes")
+        popular = (
+            "<p style=\"margin:0 0 0.5rem 0;\">"
+            + _badge_span(f"Popular · {use_case['votes']} votes")
+            + "</p>"
+        )
     tags = use_case.get("tags") or []
-    tag_row = " ".join(
-        "<span style=\"display:inline-block;margin:0 0.25rem 0.25rem 0;padding:0.1rem 0.45rem;"
-        "border-radius:999px;font-size:0.7rem;color:#b7c4c8;background:rgba(255,255,255,0.06);\">"
+    tag_bits = "".join(
+        "<span style=\"display:inline-block;box-sizing:border-box;margin:0 0.25rem 0.25rem 0;"
+        "padding:0.1rem 0.45rem;border-radius:999px;font-size:0.7rem;color:#b7c4c8;"
+        "background:rgba(255,255,255,0.06);\">"
         f"#{html.escape(t)}</span>"
         for t in tags[:3]
     )
@@ -305,11 +364,8 @@ def render_use_case_card(
         use_case.get("submitterEmail") or use_case.get("submitter") or "Unknown"
     )
     rel_date = html.escape(format_relative_date(use_case["createdAt"]))
-    comments = len(use_case.get("comments", []))
-    card_shell = (
-        "<div style=\"box-sizing:border-box;background:rgba(14,42,47,0.82);"
-        "border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:1rem 1.25rem;"
-        "margin-bottom:0.25rem;box-shadow:0 4px 24px rgba(0,0,0,0.2);\">"
+    card_body = (
+        "<div style=\"min-width:0;\">"
         "<div style=\"display:flex;justify-content:space-between;align-items:flex-start;"
         "gap:0.75rem;margin-bottom:0.5rem;\">"
         f"<h3 style=\"margin:0;font-size:1rem;font-weight:700;color:#f5f7fa;"
@@ -319,31 +375,26 @@ def render_use_case_card(
         f"{_date_badge(use_case['createdAt'])}"
         f"{_status_badge(use_case.get('status', 'Submitted'))}"
         "</div></div>"
-        f"<p style=\"margin:0 0 0.5rem 0;font-size:0.875rem;color:#b7c4c8;line-height:1.45;\">{desc}</p>"
+        f"<p style=\"margin:0 0 0.5rem 0;font-size:0.875rem;color:#b7c4c8;line-height:1.45;"
+        f"display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;\">"
+        f"{desc}</p>"
         f"{popular}"
-        f"<div style=\"margin:0.35rem 0 0.5rem 0;line-height:1.6;\">{badge_row}</div>"
-        "<div style=\"display:flex;flex-wrap:wrap;align-items:center;gap:0.25rem 0.65rem;"
-        "font-size:0.75rem;color:#b7c4c8;\">"
-        f"{_meta_pill(get_display_department(use_case['department']))}"
-        f"<span>{html.escape(use_case['category'])}</span>"
-        f"<span>Impact: {html.escape(use_case['impact'])}</span>"
-        f"<span>Effort: {html.escape(use_case['effort'])}</span>"
-        f"<span>💬 {comments}</span>"
-        f"<span style=\"color:#8DC63F;font-weight:600;\">{use_case['votes']} votes</span>"
-        "</div>"
-        f"<p style=\"margin:0.65rem 0 0 0;font-size:0.7rem;color:#8a9a90;\">"
+        f"{_meta_line(use_case)}"
+        f"<p style=\"margin:0.5rem 0 0 0;font-size:0.7rem;color:#8a9a90;\">"
         f"by {submitter} · {rel_date}</p>"
-        f"<div style=\"margin-top:0.35rem;\">{tag_row}</div>"
+        f"<p style=\"margin:0.35rem 0 0 0;line-height:1.6;\">{tag_bits}</p>"
         "</div>"
     )
-    st.markdown('<div class="uc-card-wrap"><span class="uc-card-marker"></span></div>', unsafe_allow_html=True)
     col_vote, col_body = st.columns([1, 11], gap="small")
     with col_vote:
+        st.markdown('<span class="uc-list-marker"></span>', unsafe_allow_html=True)
         if show_vote:
             render_vote_box(store, email, use_case)
     with col_body:
-        st.markdown(card_shell, unsafe_allow_html=True)
-        if st.button("View details", key=f"detail_{use_case['id']}", use_container_width=True):
+        st.markdown(card_body, unsafe_allow_html=True)
+        detail_key = f"detail_{use_case['id']}"
+        detail_label = "View details" if show_detail_button else "View use case →"
+        if st.button(detail_label, key=detail_key, type="secondary", use_container_width=True):
             st.session_state["detail_id"] = use_case["id"]
             st.session_state["page"] = "Use Case Detail"
             st.rerun()

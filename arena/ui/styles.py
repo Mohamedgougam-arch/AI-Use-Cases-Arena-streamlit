@@ -232,12 +232,31 @@ div[data-testid="stHtml"] iframe {{
 }}
 
 /* Use-case list cards (Vercel UseCaseCard layout) */
-.uc-card-wrap {{
-  margin-bottom: 0.75rem;
+.uc-list-marker {{
+  display: none;
 }}
 
-.uc-card-marker + div [data-testid="stVerticalBlock"] {{
-  gap: 0.35rem;
+div[data-testid="stHorizontalBlock"]:has(.uc-list-marker) {{
+  background: {CARD};
+  background-image: radial-gradient(ellipse at top left, rgba(141, 198, 63, 0.06), transparent 55%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem 0.85rem 0.65rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  align-items: flex-start !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}}
+
+div[data-testid="stHorizontalBlock"]:has(.uc-list-marker):hover {{
+  border-color: rgba(141, 198, 63, 0.3);
+  box-shadow: 0 0 20px rgba(141, 198, 63, 0.1);
+}}
+
+div[data-testid="stHorizontalBlock"]:has(.uc-list-marker) div.stButton > button {{
+  font-size: 0.75rem !important;
+  padding: 0.35rem 0.65rem !important;
+  min-height: 2rem !important;
 }}
 
 div[data-testid="column"]:has(.vote-box-marker) {{
@@ -341,7 +360,29 @@ div[data-testid="column"]:has(.vote-box-marker) div.stButton > button[kind="prim
   gap: 0.5rem;
 }}
 
-/* Dashboard hero */
+/* Dashboard hero (one glass row: text + CTA buttons) */
+.hero-panel-marker {{
+  display: none;
+}}
+
+div[data-testid="stHorizontalBlock"]:has(.hero-panel-marker) {{
+  background: {CARD};
+  background-image: radial-gradient(ellipse at top left, rgba(141, 198, 63, 0.1), transparent 50%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem 1.25rem 1.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  align-items: center !important;
+  gap: 1rem !important;
+}}
+
+div[data-testid="stHorizontalBlock"]:has(.hero-panel-marker) div.stButton > button[kind="secondary"] {{
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: {FOREGROUND} !important;
+}}
+
 .dashboard-hero {{
   display: flex;
   align-items: center;
@@ -729,9 +770,10 @@ div[data-testid="stForm"] [data-testid="stFormSubmitButton"] button {{
 
 .sidebar-score-value {{
   color: {PRIMARY};
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
+  line-height: 1.2;
 }}
 
 .sidebar-score-value span {{
@@ -756,10 +798,15 @@ div[data-testid="stForm"] [data-testid="stFormSubmitButton"] button {{
 }}
 
 .leader-badge {{
-  color: {PRIMARY};
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: #fbbf24;
   font-size: 0.62rem;
-  font-weight: 600;
-  margin: 0 0 0.3rem 0;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 0 0.35rem 0;
 }}
 
 [data-testid="stSidebar"] div.stButton > button[key="sign_out_btn"] {{

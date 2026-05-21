@@ -115,7 +115,9 @@ def render_dashboard(store: ArenaStore, email: str, is_admin: bool) -> None:
                 st.rerun()
         else:
             for uc in trending:
-                render_use_case_card(store, email, uc)
+                render_use_case_card(
+                    store, email, uc, show_detail_button=False
+                )
 
     with right:
         st.markdown('<div class="panel-glass-start"></div>', unsafe_allow_html=True)

@@ -1029,16 +1029,12 @@ body.arena-login-active .gdpr-notice {{
 """
 
 
-def inject_styles(*, login: bool = False, clear_effects: bool = True) -> None:
+def inject_styles(*, login: bool = False) -> None:
     import streamlit as st
-
-    from arena.ui.effects import clear_celebration_effects
 
     st.markdown(BASE_CSS, unsafe_allow_html=True)
     if login:
         st.markdown(LOGIN_CSS, unsafe_allow_html=True)
-    elif clear_effects:
-        clear_celebration_effects()
 
 
 def set_login_body_class(active: bool) -> None:

@@ -55,7 +55,7 @@ from arena.ui.components import (
     section_heading,
     stat_card,
 )
-from arena.ui.effects import celebrate_submission
+from arena.ui.effects import celebrate_submission, show_post_submit_feedback
 
 
 def render_dashboard(store: ArenaStore, email: str, is_admin: bool) -> None:
@@ -226,6 +226,7 @@ def render_submit(store: ArenaStore, email: str) -> None:
 
 
 def render_gallery(store: ArenaStore, email: str) -> None:
+    show_post_submit_feedback()
     use_cases = store.use_cases
     page_header(
         "Use Case Gallery",
